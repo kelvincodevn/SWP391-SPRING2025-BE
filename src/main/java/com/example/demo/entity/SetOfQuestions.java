@@ -2,26 +2,42 @@ package com.example.demo.entity;
 
 import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.util.List;
 
 @Entity
 @Table(name = "set_of_questions")
+
 public class SetOfQuestions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer questionId;
+    @Column(name = "question_id", nullable = false)
+    private long questionId;
 
     private String questionText;
     private Integer questionNumber;
     private Integer maxScore;
 
-    @ManyToOne
-    @JoinColumn(name = "testId", nullable = false)
-    private Test test;
+    @ManyToOne(cascade = CascadeType.PERSIST) // Thêm cascade ở đây
+    @JoinColumn(name = "tests_id", nullable = false) // Khóa ngoại tham chiếu tới tests
+    private Tests tests;
 
     @JsonIgnore
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TestAnswer> answers;
+
+    @Version
+    private int version;
+
+    public SetOfQuestions(long questionId, String questionText, Integer questionNumber, Integer maxScore, Tests tests, List<TestAnswer> answers, int version) {
+        this.questionId = questionId;
+        this.questionText = questionText;
+        this.questionNumber = questionNumber;
+        this.maxScore = maxScore;
+        this.tests = tests;
+        this.answers = answers;
+        this.version = version;
+    }
 
     public SetOfQuestions() {
     }
@@ -34,11 +50,11 @@ public class SetOfQuestions {
         this.answers = answers;
     }
 
-    public Integer getQuestionId() {
+    public long getQuestionId() {
         return questionId;
     }
 
-    public void setQuestionId(Integer questionId) {
+    public void setQuestionId(Long questionId) {
         this.questionId = questionId;
     }
 
@@ -66,11 +82,12 @@ public class SetOfQuestions {
         this.maxScore = maxScore;
     }
 
-    public Test getTest() {
-        return test;
+    public Tests getTests() {
+        return tests;
     }
 
-    public void setTest(Test test) {
-        this.test = test;
+    public void setTests(Tests tests) {
+        this.tests = tests;
     }
+
 }

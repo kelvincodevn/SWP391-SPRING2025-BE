@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 @Entity
@@ -12,13 +13,14 @@ public class TestAnswer {
     private String answer;
     private Integer score;
 
-    @ManyToOne
+    @Version
+    private Integer version;
+
+    @JsonIgnore
+    @ManyToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "questionId", nullable = false)
     private SetOfQuestions question;
 
-    @ManyToOne
-    @JoinColumn(name = "resultId", nullable = false)
-    private TestResult result;
 
     public TestAnswer() {
     }
@@ -55,13 +57,9 @@ public class TestAnswer {
         this.question = question;
     }
 
-    public TestResult getResult() {
-        return result;
-    }
 
-    public void setResult(TestResult result) {
-        this.result = result;
-    }
+
+
 }
 
 
