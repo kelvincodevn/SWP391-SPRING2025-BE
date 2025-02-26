@@ -93,12 +93,6 @@ public class TestService {
         Map<String, Tests> existingTests = testsRepository.findByTestsNameIn(testNames)
                 .stream().collect(Collectors.toMap(Tests::getTestsName, Function.identity()));
 
-        // Tìm test ID lớn nhất hiện tại trong database
-        Long maxTestId = testsRepository.findMaxTestsId();
-        if (maxTestId == null) {
-            maxTestId = 0L;
-        }
-
         List<Tests> newTests = new ArrayList<>();
         List<SetOfQuestions> questionsToSave = new ArrayList<>();
         List<TestAnswer> answersToSave = new ArrayList<>();
@@ -108,8 +102,10 @@ public class TestService {
             Tests test = existingTests.get(testName);
 
             if (test == null) {
-                maxTestId++;
-                test = new Tests(maxTestId, testName, "Generated test: " + testName);
+                // Không cần tăng maxTestId nữa vì database sẽ tự động sinh ID mới
+                test = new Tests();
+                test.setTestsName(testName);
+                test.setTestsDescription("Generated test: " + testName);
                 newTests.add(test);
                 existingTests.put(testName, test);
             }
