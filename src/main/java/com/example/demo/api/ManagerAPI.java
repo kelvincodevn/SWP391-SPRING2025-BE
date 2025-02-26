@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
-@RequestMapping("/api/Manager")
+@RequestMapping("/api/Manager/dashboard")
 @SecurityRequirement(name = "api")
 public class ManagerAPI {
 

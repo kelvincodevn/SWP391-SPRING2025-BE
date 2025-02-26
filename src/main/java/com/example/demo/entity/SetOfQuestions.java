@@ -26,6 +26,14 @@ public class SetOfQuestions {
     public SetOfQuestions() {
     }
 
+    public List<TestAnswer> getAnswers() {
+        return answers;
+    }
+
+    public void setAnswers(List<TestAnswer> answers) {
+        this.answers = answers;
+    }
+
     public Integer getQuestionId() {
         return questionId;
     }

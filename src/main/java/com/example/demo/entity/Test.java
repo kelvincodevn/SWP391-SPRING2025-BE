@@ -4,15 +4,20 @@ import jakarta.persistence.*;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.List;
 
-@Entity
-@Table(name = "test")
-public class Test {
+    @Entity
+    @Table(name = "test")
+    public class Test {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer testId;
+    private long testId;
 
     private String testName;
     private String testDescription;
+
+        public Test(String testName, String testDescription) {
+            this.testName = testName;
+            this.testDescription = testDescription;
+        }
 
     @JsonIgnore
     @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -25,11 +30,11 @@ public class Test {
     public Test() {
     }
 
-    public Integer getTestId() {
+    public long getTestId() {
         return testId;
     }
 
-    public void setTestId(Integer testId) {
+    public void setTestId(long testId) {
         this.testId = testId;
     }
 
