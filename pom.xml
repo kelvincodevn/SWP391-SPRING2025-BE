@@ -5,7 +5,6 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-
 		<version>3.4.2</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
@@ -14,7 +13,6 @@
 	<version>0.0.1-SNAPSHOT</version>
 	<name>springboot-backend</name>
 	<description>Mental Health Support System For School</description>
-		<version>3.4.1</version>
 		<relativePath/> <!-- lookup parent from repository -->
 
 	<url/>
