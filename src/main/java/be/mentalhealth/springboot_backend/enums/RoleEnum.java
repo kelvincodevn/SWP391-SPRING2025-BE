@@ -1,5 +1,9 @@
-package be.mentalhealth.springboot_backend.enums;
+package com.example.demo.enums;
 
 public enum RoleEnum {
-    STUDENT, PARENT, PSYCHOLOGIST,CUSTOMER
+    //enum là 1 hằng số
+    MANAGER,
+    STUDENT,
+    PARENT,
+    PSYCHOLOGIST
 }

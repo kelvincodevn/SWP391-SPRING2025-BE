@@ -1,9 +1,12 @@
-package be.mentalhealth.springboot_backend.config;
+package com.example.demo.config;
 
-import be.mentalhealth.springboot_backend.service.AuthenticationService;
+import com.example.demo.service.AuthenticationService;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -32,11 +35,17 @@ public class SecurityConfig {
     }
 
     @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
+        return authenticationConfiguration.getAuthenticationManager();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
         return http
                 .cors().and() //lỗi version quá mới (ko sao kệ)
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
+//                        .requestMatchers("/Manager/**").hasRole("MANAGER")  // Chỉ admin truy cập được
                         .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                         .requestMatchers("/**").permitAll() // /** các đường dẫn sau dấu / cho permit All
                         .anyRequest().authenticated()
@@ -44,20 +53,9 @@ public class SecurityConfig {
                 .userDetailsService(authenticationService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-
-                .logout(logout -> logout
-                        .logoutUrl("/logout") // Đường dẫn API logout
-                        .invalidateHttpSession(true) // Hủy session
-                        .clearAuthentication(true) // Xóa xác thực user
-                        .logoutSuccessHandler((request, response, authentication) ->
-                                response.setStatus(200) // Trả về HTTP 200 OK
-                        )
-                )
-
                 .build();
     }
 
 
 
 }
-

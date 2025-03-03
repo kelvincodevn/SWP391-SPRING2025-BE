@@ -1,9 +1,18 @@
-package be.mentalhealth.springboot_backend.entity.request;
+package com.example.demo.entity.request;
 
 public class AccountRequest {
     public String fullName;
+    public String username;
     public String email;
-    public String password; //ctrl + D
+    public String password;
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
 
     public String getFullName() {
         return fullName;
