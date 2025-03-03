@@ -40,15 +40,9 @@ public class Question {
         choice.setQuestion(this);
         choices.add(choice);
     }
-<<<<<<< HEAD
 
     // 🔹 Thêm phương thức này để tránh lỗi
     public void setTest(Test test) {
         this.test = test;
     }
 }
-=======
-}
-
-
->>>>>>> 5982d663ddbb7d04b583f75c1c58e950d57db4e7

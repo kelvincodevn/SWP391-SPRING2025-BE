@@ -1,54 +1,15 @@
 package be.mentalhealth.springboot_backend.service;
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-import org.springframework.beans.factory.annotation.Autowired;
-=======
-=======
->>>>>>> Stashed changes
->>>>>>> 5982d663ddbb7d04b583f75c1c58e950d57db4e7
 import be.mentalhealth.springboot_backend.entity.Survey;
 import be.mentalhealth.springboot_backend.entity.SurveyEmailLog;
 import be.mentalhealth.springboot_backend.repository.SurveyEmailLogRepository;
 import be.mentalhealth.springboot_backend.repository.SurveyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.MailException;
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
->>>>>>> 5982d663ddbb7d04b583f75c1c58e950d57db4e7
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
-<<<<<<< Updated upstream
-@Service
-public class EmailService {
-
-    @Autowired
-    private JavaMailSender mailSender;
-
-    public void sendSurveyEmail(String toEmail, String surveyLink) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(toEmail);
-        message.setSubject("Survey Invitation");
-        message.setText("Please complete the survey: " + surveyLink);
-        mailSender.send(message);
-    }
-}
-
-=======
-=======
->>>>>>> Stashed changes
->>>>>>> 5982d663ddbb7d04b583f75c1c58e950d57db4e7
 import java.util.ArrayList;
 import java.util.List;
 
@@ -92,10 +53,3 @@ public class EmailService {
         return emailLogs;
     }
 }
-<<<<<<< HEAD
-=======
-<<<<<<< Updated upstream
->>>>>>> Stashed changes
-=======
->>>>>>> Stashed changes
->>>>>>> 5982d663ddbb7d04b583f75c1c58e950d57db4e7
