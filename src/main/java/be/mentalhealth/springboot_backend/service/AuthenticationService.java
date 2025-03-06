@@ -1,62 +1,100 @@
-package be.mentalhealth.springboot_backend.service;
+package com.example.demo.service;
 
-import be.mentalhealth.springboot_backend.entity.Account;
-import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
-import be.mentalhealth.springboot_backend.enums.RoleEnum;
-import be.mentalhealth.springboot_backend.repository.AuthenticationRepository;
+
+import com.example.demo.Repository.AuthenticationRepository;
+
+import com.example.demo.entity.User;
+import com.example.demo.entity.request.AccountRequest;
+import com.example.demo.entity.request.AuthenticationRequest;
+import com.example.demo.entity.response.AuthenticationResponse;
+import com.example.demo.enums.RoleEnum;
+import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.*;
+import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
-//class xử lý API Authentication
 @Service
 public class AuthenticationService implements UserDetailsService {
-
     @Autowired
     AuthenticationRepository authenticationRepository;
+    @Autowired
+    PasswordEncoder passwordEncoder;
 
     @Autowired
-    PasswordEncoder passwordEncoder; //kiểu dữ liệu + instance
+    AuthenticationManager authenticationManager;
 
-    public Account register(AccountRequest accountRequest) {
-        // xử lý logic
+    @Autowired
+    TokenService tokenService;
 
-        // lưu xuống DB
-        Account account = new Account(); //tạo account
+    public User register(AccountRequest accountRequest){
+        //xử lý logic
 
-        account.setRoleEnum(RoleEnum.CUSTOMER); //set role
-        account.setPassword(passwordEncoder.encode(accountRequest.getPassword())); // mã hóa password
-        account.setFullName(accountRequest.getFullName()); //lấy fullName từ accountRequest set vào
-        account.setEmail(accountRequest.getEmail()); //lấy email từ accountRequest set vào
+        //lưu xuống db
 
-        Account newAccount = authenticationRepository.save(account);
-//        Account newAccount = authenticationRepository.save(account);
-        return newAccount;
+        User user = new User();
+
+        user.setUserName(accountRequest.getUsername());
+        user.setRoleEnum(RoleEnum.STUDENT);
+        user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
+        user.setFullName(accountRequest.getFullName());
+        user.setEmail(accountRequest.getEmail());
+
+        User newUser = authenticationRepository.save(user);
+        return newUser;
     }
 
-    public Account login(Account account) {
-        // xử lý logic
-        // lưu xuống DB
-
-        // mã hóa password trc khi lưu xuống DB
-//            String currentPassword = account.getPassword();
-//            String newPassword = passwordEncoder.encode(currentPassword);
-        // account.setPassword(newPassword);
-
-//            account.setRoleEnum(RoleEnum.CUSTOMER);
-//            account.setPassword(passwordEncoder.encode(account.getPassword())); // mã hóa password
-        Account newAccount = authenticationRepository.save(account);
-
-        return newAccount;
-    }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return authenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
+    }
 
-        return null;
+    public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getUsername().trim(),
+                            authenticationRequest.getPassword().trim()
+                    )
+            );
+        }catch (Exception e) {
+            System.err.println("Login error: " + e.getMessage());
+            e.printStackTrace(); // In ra stack trace để debug
+
+            if (e instanceof BadCredentialsException) {
+                throw new BadCredentialsException("Sai thông tin đăng nhập: " + e.getMessage());
+            } else if (e instanceof LockedException) {
+                throw new LockedException("Tài khoản đã bị khóa: " + e.getMessage());
+            } else if (e instanceof DisabledException) {
+                throw new DisabledException("Tài khoản đã bị vô hiệu hóa: " + e.getMessage());
+            } else if (e instanceof AccountExpiredException) {
+                throw new AccountExpiredException("Tài khoản đã hết hạn: " + e.getMessage());
+            } else if (e instanceof CredentialsExpiredException) {
+                throw new CredentialsExpiredException("Thông tin đăng nhập đã hết hạn: " + e.getMessage());
+            } else {
+                throw new AuthenticationException("Lỗi xác thực: " + e.getMessage()) {
+                };
+            }
+        }
+
+        User user = authenticationRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow();
+        String token = tokenService.generateToken(user);
+
+         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+         authenticationResponse.setEmail(user.getEmail());
+         authenticationResponse.setUserID(user.getUserID());
+         authenticationResponse.setFullName(user.getFullName());
+         authenticationResponse.setUsername(user.getUsername());
+         authenticationResponse.setRoleEnum(user.getRoleEnum());
+         authenticationResponse.setToken(token);
+
+
+         return authenticationResponse;
+
     }
 }

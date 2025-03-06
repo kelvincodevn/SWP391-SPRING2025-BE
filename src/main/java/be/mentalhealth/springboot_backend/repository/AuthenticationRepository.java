@@ -1,13 +1,16 @@
-package be.mentalhealth.springboot_backend.repository;
+package com.example.demo.Repository;
 
-import be.mentalhealth.springboot_backend.entity.Account;
+import com.example.demo.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 
-@Repository
-//extend để kế thừa và sử dụng những bộ công uuj mà dataJPA đã có sẵn
-public interface AuthenticationRepository extends JpaRepository<Account, Long> {
+import java.util.List;
+import java.util.Optional;
 
+public interface AuthenticationRepository extends JpaRepository<User, Long> {
 
+    User findByUserID(long UserID);
 
+   Optional<User> findByUsername(String username);
+
+    List<User> findAll();
 }

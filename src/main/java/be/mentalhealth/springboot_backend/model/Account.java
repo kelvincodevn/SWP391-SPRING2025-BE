@@ -1,22 +1,17 @@
-package be.mentalhealth.springboot_backend.model;
+package com.example.demo.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-import lombok.Data;
 
-//generate getter và setter
-@Data
 public class Account {
 
-    //id thường tự generate sau khi tự và lưu dưới DB
     public long id;
-    @NotBlank(message = "Fullname cannot be blank!")
-    String fullName;
+
+    String fullname;
     @Pattern(regexp = "^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$", message = "Invalid email!")
     String email;
-    @Pattern(regexp = "/(84|0[3|5|7|8|9])+([0-9]{8})\\b/g", message = "Invalid phone")
+    @Pattern(regexp = "/(84|0[3|5|7|8|9])+([0-9]{8})\\b/g", message = "Invalid phone!")
     String phone;
-    @NotBlank(message = "Password cannot be blank!")
+    @NotBlank(message = "password can not be blank!")
     String password;
-
 }
