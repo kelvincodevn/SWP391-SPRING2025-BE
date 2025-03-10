@@ -1,6 +1,6 @@
-package com.example.demo.entity.response;
+package be.mentalhealth.springboot_backend.entity.response;
 
-import com.example.demo.enums.RoleEnum;
+import be.mentalhealth.springboot_backend.enums.RoleEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;

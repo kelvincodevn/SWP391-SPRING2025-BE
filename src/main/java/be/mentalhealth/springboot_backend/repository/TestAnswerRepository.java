@@ -1,7 +1,8 @@
-package com.example.demo.Repository;
+package be.mentalhealth.springboot_backend.repository;
 
-import com.example.demo.entity.SetOfQuestions;
-import com.example.demo.entity.TestAnswer;
+
+import be.mentalhealth.springboot_backend.entity.SetOfQuestions;
+import be.mentalhealth.springboot_backend.entity.TestAnswer;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;

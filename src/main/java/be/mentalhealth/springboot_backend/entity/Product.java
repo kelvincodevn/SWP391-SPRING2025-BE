@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package be.mentalhealth.springboot_backend.entity;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.Min;

@@ -1,4 +1,4 @@
-package com.example.demo.entity.request;
+package be.mentalhealth.springboot_backend.entity.request;
 
 public class AuthenticationRequest {
     public String username;

@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package be.mentalhealth.springboot_backend.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;

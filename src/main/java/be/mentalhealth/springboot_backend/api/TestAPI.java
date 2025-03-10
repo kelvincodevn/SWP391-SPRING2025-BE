@@ -1,7 +1,8 @@
-package com.example.demo.api.Manager;
+package be.mentalhealth.springboot_backend.api;
 
-import com.example.demo.entity.Tests;
-import com.example.demo.service.TestService;
+
+import be.mentalhealth.springboot_backend.entity.Tests;
+import be.mentalhealth.springboot_backend.service.TestService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
