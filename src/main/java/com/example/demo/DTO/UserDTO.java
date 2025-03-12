@@ -1,4 +1,4 @@
-package be.mentalhealth.springboot_backend.DTO;
+package com.example.demo.DTO;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

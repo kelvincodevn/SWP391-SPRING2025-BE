@@ -1,13 +1,8 @@
 package com.example.demo.service;
 
-import com.example.demo.DTO.TestAnswerDTO;
-import com.example.demo.DTO.TestDetailsDTO;
-import com.example.demo.Repository.SetOfQuestionsRepository;
-import com.example.demo.Repository.TestAnswerRepository;
-import com.example.demo.Repository.TestsRepository;
-import com.example.demo.entity.SetOfQuestions;
-import com.example.demo.entity.TestAnswer;
-import com.example.demo.entity.Tests;
+import com.example.demo.DTO.*;
+import com.example.demo.Repository.*;
+import com.example.demo.entity.*;
 import com.example.demo.model.ExcelRow;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
@@ -18,6 +13,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,8 +27,19 @@ public class TestService {
     private SetOfQuestionsRepository setOfQuestionsRepository;
     @Autowired
     private TestAnswerRepository testAnswerRepository;
+    @Autowired
+    private TestResultRepository testResultRepository;
+
+    @Autowired
+    private TestHistoryRepository testHistoryRepository;
+
+    @Autowired
+    private TestScoringRepository testScoringRepository; // Autowire repository
 
 
+    Map<Integer, TestAnswerDTO> uniqueAnswersMap = new LinkedHashMap<>();
+
+    List<TestAnswerDTO> uniqueAnswers = new ArrayList<>(uniqueAnswersMap.values());
 
     public List<Tests> getAllTests() {
         return testsRepository.findAll();
@@ -43,19 +50,266 @@ public class TestService {
         if (testOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("Test with ID " + testsId + " not found.");
         }
-        Tests tests = testOptional.get();
-        List<SetOfQuestions> questions = setOfQuestionsRepository.findByTests(tests);
-        List<TestAnswerDTO> answers = testAnswerRepository.findByQuestionIn(questions)
-                .stream().map(answer -> new TestAnswerDTO(
-                        answer.getQuestion().getQuestionNumber(),
-                        answer.getQuestion().getQuestionText(),
-                        answer.getAnswer(),
-                        answer.getScore()))
+
+        Tests test = testOptional.get();
+        List<SetOfQuestions> questions = setOfQuestionsRepository.findByTests(test);
+
+        // Process questions and answers
+        List<QuestionDTO> questionList = questions.stream()
+                .map(q -> new QuestionDTO(
+                        q.getQuestionNumber(),  // Use existing question number
+                        q.getQuestionText(),
+                        testAnswerRepository.findByQuestionIn(Collections.singletonList(q)).stream()
+                                .map(a -> new AnswerDTO(a.getAnswer(), a.getScore()))
+                                .collect(Collectors.toList())
+                ))
                 .collect(Collectors.toList());
-        TestDetailsDTO testDetails = new TestDetailsDTO(
-                tests.getId(), tests.getTestsName(), tests.getTestsDescription(), questions.size(), answers);
+
+        TestListDTO testDetails = new TestListDTO(
+                test.getId(),
+                test.getTestsName(),
+                test.getTestsDescription(),
+                questionList.size(),
+                questionList
+        );
+
         return ResponseEntity.ok(testDetails);
     }
+
+    //mục API Test Scoring
+    public ResponseEntity<?> createTestScoring(Long testId, TestScoringDTO scoringDTO) {
+        Optional<Tests> testOptional = testsRepository.findById(testId);
+        if (testOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Test not found.");
+        }
+        Tests test = testOptional.get();
+
+        TestScoring scoring = new TestScoring();
+        scoring.setTest(test);
+        scoring.setMinScore(scoringDTO.getMinScore());
+        scoring.setMaxScore(scoringDTO.getMaxScore());
+        scoring.setLevel(scoringDTO.getLevel());
+        scoring.setDescription(scoringDTO.getDescription());
+
+        testScoringRepository.save(scoring);
+        return ResponseEntity.ok("Test scoring created successfully.");
+    }
+
+    public ResponseEntity<?> updateTestScoring(Long scoringId, TestScoringDTO scoringDTO) {
+        Optional<TestScoring> scoringOptional = testScoringRepository.findById(scoringId);
+        if (scoringOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Test scoring not found.");
+        }
+        TestScoring scoring = scoringOptional.get();
+
+        scoring.setMinScore(scoringDTO.getMinScore());
+        scoring.setMaxScore(scoringDTO.getMaxScore());
+        scoring.setLevel(scoringDTO.getLevel());
+        scoring.setDescription(scoringDTO.getDescription());
+
+        testScoringRepository.save(scoring);
+        return ResponseEntity.ok("Test scoring updated successfully.");
+    }
+
+    public ResponseEntity<?> getTestScoring(Long testId) {
+        Optional<Tests> testOptional = testsRepository.findById(testId);
+        if (testOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Test not found.");
+        }
+        Tests test = testOptional.get();
+
+        List<TestScoring> scorings = testScoringRepository.findByTest(test);
+        return ResponseEntity.ok(scorings);
+    }
+
+    public ResponseEntity<?> deleteTestScoring(Long scoringId) {
+        if (!testScoringRepository.existsById(scoringId)) {
+            return ResponseEntity.badRequest().body("Test scoring not found.");
+        }
+        testScoringRepository.deleteById(scoringId);
+        return ResponseEntity.ok("Test scoring deleted successfully.");
+    }
+    //mục kết thúc API Test Scoring
+
+    @Transactional
+    public ResponseEntity<String> submitTest(UserAnswersRequestDTO submission, User user) {
+        Optional<Tests> testOptional = testsRepository.findById(submission.getTestId());
+        if (testOptional.isEmpty()) {
+            return ResponseEntity.badRequest().body("Test not found.");
+        }
+        Tests test = testOptional.get();
+
+        // ✅ Create and save TestResult first
+        TestResult testResult = new TestResult();
+        testResult.setUser(user);
+        testResult.setTest(test);
+        testResult.setCreateAt(LocalDateTime.now());
+        testResult.setTotalScore(0); // Initialize total score
+        testResult.setDescription("default");
+        testResult.setLevel("default");
+        testResult = testResultRepository.save(testResult); // Save to get the generated ID
+
+        int totalScore = 0;
+        List<TestHistory> historyList = new ArrayList<>();
+
+        // ✅ Create a single TestHistory for this submission
+        TestHistory testHistory = new TestHistory();
+        testHistory.setTestResult(testResult);
+        testHistory.setUser(user);
+        testHistory.setTestVersion("v1.0");
+        List<TestAnswerDetail> answerDetails = new ArrayList<>(); // Store multiple details
+
+        for (UserAnswerDTO answerDTO : submission.getAnswers()) {
+            Optional<SetOfQuestions> questionOpt = setOfQuestionsRepository.findById(answerDTO.getQuestionId());
+            if (questionOpt.isPresent()) {
+                SetOfQuestions question = questionOpt.get();
+
+                // ✅ Create a new TestAnswerDetail for each answer
+                TestAnswerDetail answerDetail = new TestAnswerDetail();
+                answerDetail.setTestHistory(testHistory);
+                answerDetail.setQuestionNo(question.getQuestionNumber());
+                answerDetail.setQuestion(question);
+                answerDetail.setAnswer(answerDTO.getAnswerText());
+                answerDetail.setScore(answerDTO.getScore());
+
+                totalScore += answerDTO.getScore();
+                answerDetails.add(answerDetail);
+            }
+        }
+
+        // ✅ Link all details to testHistory and save
+        testHistory.setAnswers(answerDetails);
+        historyList.add(testHistory);
+
+        if (!historyList.isEmpty()) {
+            testHistoryRepository.saveAll(historyList);
+        }
+
+        // ✅ Update total score after processing all answers
+        testResult.setTotalScore(totalScore);
+//        testResultRepository.save(testResult);
+//
+//        return ResponseEntity.ok("Test submitted successfully.");
+
+        // Logic đánh giá kết quả
+        List<TestScoring> scorings = testScoringRepository.findByTest(test);
+        String level = "Unknown";
+        String description = "Unknown";
+
+        System.out.println("Total Score: " + totalScore); // Log total score
+        System.out.println("Found Scorings: " + scorings); // Log found scorings
+
+        for (TestScoring scoring : scorings) {
+            if (scoring.getMaxScore() == null) {
+                if (totalScore >= scoring.getMinScore()) {
+                    level = scoring.getLevel();
+                    description = scoring.getDescription();
+                    break;
+                }
+            } else {
+                if (totalScore >= scoring.getMinScore() && totalScore <= scoring.getMaxScore()) {
+                    level = scoring.getLevel();
+                    description = scoring.getDescription();
+                    break;
+                }
+            }
+        }
+
+        System.out.println("Level: " + level); // Log level
+        System.out.println("Description: " + description); // Log description
+
+        testResult.setLevel(level); // Lưu level đánh giá
+        testResult.setDescription(description); // Lưu description đánh giá
+
+        testResultRepository.save(testResult);
+
+        return ResponseEntity.ok("Test submitted successfully.");
+    }
+
+//@Transactional
+//public ResponseEntity<String> submitTest(UserAnswersRequestDTO submission, User user) {
+//    Optional<Tests> testOptional = testsRepository.findById(submission.getTestId());
+//    if (testOptional.isEmpty()) {
+//        return ResponseEntity.badRequest().body("Test not found.");
+//    }
+//    Tests test = testOptional.get();
+//
+//    TestResult testResult = new TestResult();
+//    testResult.setUser(user);
+//    testResult.setTest(test);
+//    testResult.setCreateAt(LocalDateTime.now());
+//
+//    int totalScore = 0;
+//    List<TestHistory> historyList = new ArrayList<>();
+//
+//    TestHistory testHistory = new TestHistory();
+//    testHistory.setTestResult(testResult); // Link testResult here
+//    testHistory.setUser(user);
+//    testHistory.setTestVersion("v1.0");
+//    List<TestAnswerDetail> answerDetails = new ArrayList<>();
+//
+//    for (UserAnswerDTO answerDTO : submission.getAnswers()) {
+//        Optional<SetOfQuestions> questionOpt = setOfQuestionsRepository.findById(answerDTO.getQuestionId());
+//        if (questionOpt.isPresent()) {
+//            SetOfQuestions question = questionOpt.get();
+//
+//            TestAnswerDetail answerDetail = new TestAnswerDetail();
+//            answerDetail.setTestHistory(testHistory);
+//            answerDetail.setQuestionNo(question.getQuestionNumber());
+//            answerDetail.setQuestion(question);
+//            answerDetail.setAnswer(answerDTO.getAnswerText());
+//            answerDetail.setScore(answerDTO.getScore());
+//
+//            totalScore += answerDTO.getScore();
+//            answerDetails.add(answerDetail);
+//        }
+//    }
+//
+//    testHistory.setAnswers(answerDetails);
+//    historyList.add(testHistory);
+//
+//    if (!historyList.isEmpty()) {
+//        testHistoryRepository.saveAll(historyList);
+//    }
+//
+//    testResult.setTotalScore(totalScore);
+//
+//    // Logic đánh giá kết quả
+//    List<TestScoring> scorings = testScoringRepository.findByTest(test);
+//    String level = "Unknown";
+//    String description = "Unknown";
+//
+//    System.out.println("Total Score: " + totalScore);
+//    System.out.println("Found Scorings: " + scorings);
+//
+//    for (TestScoring scoring : scorings) {
+//        if (scoring.getMaxScore() == null) {
+//            if (totalScore >= scoring.getMinScore()) {
+//                level = scoring.getLevel();
+//                description = scoring.getDescription();
+//                break;
+//            }
+//        } else {
+//            if (totalScore >= scoring.getMinScore() && totalScore <= scoring.getMaxScore()) {
+//                level = scoring.getLevel();
+//                description = scoring.getDescription();
+//                break;
+//            }
+//        }
+//    }
+//
+//    System.out.println("Level: " + level);
+//    System.out.println("Description: " + description);
+//
+//    testResult.setLevel(level);
+//    testResult.setDescription(description);
+//
+//    // Save testResult only after level and description are set
+//    testResultRepository.save(testResult);
+//
+//    return ResponseEntity.ok("Test submitted successfully.");
+//}
+
 
     @Transactional
     public ResponseEntity<String> uploadExcelFile(MultipartFile file) {
@@ -86,10 +340,10 @@ public class TestService {
         }
     }
 
+
     private void processExcelData(Map<String, List<ExcelRow>> testDataMap) {
         Set<String> testNames = testDataMap.keySet();
 
-        // Lấy tất cả bài kiểm tra hiện có từ database
         Map<String, Tests> existingTests = testsRepository.findByTestsNameIn(testNames)
                 .stream().collect(Collectors.toMap(Tests::getTestsName, Function.identity()));
 
@@ -102,45 +356,50 @@ public class TestService {
             Tests test = existingTests.get(testName);
 
             if (test == null) {
-                // Không cần tăng maxTestId nữa vì database sẽ tự động sinh ID mới
                 test = new Tests();
                 test.setTestsName(testName);
                 test.setTestsDescription("Generated test: " + testName);
-                newTests.add(test);
+                test = testsRepository.save(test); // Ensure test is saved before use
                 existingTests.put(testName, test);
             }
 
+            Map<String, SetOfQuestions> existingQuestions = setOfQuestionsRepository.findByTests(test)
+                    .stream().collect(Collectors.toMap(SetOfQuestions::getQuestionText, Function.identity()));
+
             List<SetOfQuestions> tempQuestions = new ArrayList<>();
+            int questionNumber = 1; // Assign question numbers sequentially
+
             for (ExcelRow row : entry.getValue()) {
-                SetOfQuestions question = new SetOfQuestions();
-                question.setTests(test);
-                question.setQuestionNumber(row.getQuestionNumber());
-                question.setQuestionText(row.getQuestionText());
-                question.setMaxScore(row.getMaxScore());
-                tempQuestions.add(question);
+                SetOfQuestions question = existingQuestions.get(row.getQuestionText());
+                if (question == null) {
+                    question = new SetOfQuestions();
+                    question.setTests(test);
+                    question.setQuestionNumber(questionNumber++); // Assign new sequential number
+                    question.setQuestionText(row.getQuestionText());
+                    question.setMaxScore(row.getMaxScore());
+                    tempQuestions.add(question);
+                    existingQuestions.put(row.getQuestionText(), question);
+                }
             }
 
-            // Lưu danh sách câu hỏi trước để đảm bảo ID được tạo
             setOfQuestionsRepository.saveAll(tempQuestions);
             questionsToSave.addAll(tempQuestions);
 
-            // Tạo danh sách câu trả lời từ dữ liệu Excel
-            for (int i = 0; i < tempQuestions.size(); i++) {
-                ExcelRow row = entry.getValue().get(i);
-                SetOfQuestions setOfQuestions = tempQuestions.get(i);
-                TestAnswer answer = new TestAnswer();
-                answer.setQuestion(setOfQuestions);
-                answer.setAnswer(row.getAnswerText()); // Lấy answerText từ Excel
-                answer.setScore(row.getMaxScore());
-                answersToSave.add(answer);
+            for (ExcelRow row : entry.getValue()) {
+                SetOfQuestions question = existingQuestions.get(row.getQuestionText());
+                if (question != null) {
+                    TestAnswer answer = new TestAnswer();
+                    answer.setQuestion(question);
+                    answer.setAnswer(row.getAnswerText());
+                    answer.setScore(row.getMaxScore());
+                    answersToSave.add(answer);
+                }
             }
         }
 
-        // Lưu các bài kiểm tra mới vào database
         if (!newTests.isEmpty()) {
             testsRepository.saveAll(newTests);
         }
-        // Lưu câu hỏi và câu trả lời
         if (!questionsToSave.isEmpty()) {
             setOfQuestionsRepository.saveAll(questionsToSave);
         }
@@ -214,6 +473,5 @@ public class TestService {
         return ResponseEntity.ok("Deleted test with ID: " + id);
     }
 }
-
 
 
