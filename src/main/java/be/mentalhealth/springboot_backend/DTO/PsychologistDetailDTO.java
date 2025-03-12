@@ -9,7 +9,7 @@ public class PsychologistDetailDTO {
     private String major;
     private String workplace;
     private String degree;
-<<<<<<< HEAD
+
 
     private PsychologistDetailDTO(PsychologistDetailDTOBuilder builder) {
         this.major = builder.major;
@@ -73,6 +73,4 @@ public class PsychologistDetailDTO {
     public void setDegree(String degree) {
         this.degree = degree;
     }
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 }

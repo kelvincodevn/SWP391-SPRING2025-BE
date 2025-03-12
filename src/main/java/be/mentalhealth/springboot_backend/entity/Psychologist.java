@@ -1,6 +1,5 @@
 package be.mentalhealth.springboot_backend.entity;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
@@ -8,24 +7,14 @@ import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDate;
-=======
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import jakarta.persistence.*;
-import lombok.*;
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "psychologist")
 @Getter
 @Setter
-@NoArgsConstructor
-<<<<<<< HEAD
 
-=======
-@AllArgsConstructor
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
-@Builder
 public class Psychologist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,29 +25,23 @@ public class Psychologist {
     private String fullName;
     private String email;
     private String phone;
-<<<<<<< HEAD
+
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dob;
-=======
-    private LocalDateTime dob;
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     private String gender;
     private String avatar;
     private Float serviceFee;
     private Boolean status;
 
-<<<<<<< HEAD
+
     @CreationTimestamp  // Tự động set giá trị khi tạo mới
     @Column(updatable = false)  // Không cho phép cập nhật sau khi tạo
     private LocalDateTime createdDate;
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     @OneToOne(mappedBy = "psychologist", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private PsychologistDetail psychologistDetail;
 
-<<<<<<< HEAD
     public Psychologist() {
         // Constructor mặc định bắt buộc cho Hibernate
     }
@@ -297,9 +280,5 @@ public class Psychologist {
     public void setPsychologistDetail(PsychologistDetail psychologistDetail) {
         this.psychologistDetail = psychologistDetail;
     }
-=======
-    public void softDelete() {
-        this.status = false;
-    }
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
 }

@@ -5,11 +5,8 @@ import be.mentalhealth.springboot_backend.service.SlotService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-<<<<<<< HEAD
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -26,7 +23,6 @@ import java.util.List;
 public class SlotAPI {
     private final SlotService slotService;
 
-<<<<<<< HEAD
     private static final Logger log = LoggerFactory.getLogger(SlotAPI.class);
     public SlotAPI(SlotService slotService) {
         this.slotService = slotService;
@@ -35,11 +31,6 @@ public class SlotAPI {
     @PostMapping("/create")
     public ResponseEntity<PsychologistSlot> createSlot(@RequestParam Integer psychologistId,
                                                        @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date,
-=======
-    @PostMapping("/create")
-    public ResponseEntity<PsychologistSlot> createSlot(@RequestParam Integer psychologistId,
-                                                       @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate date,
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
                                                        @RequestParam String startTime,
                                                        @RequestParam String endTime) {
 

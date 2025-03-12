@@ -7,19 +7,13 @@ import lombok.*;
 @Entity
 @Getter
 @Setter
-<<<<<<< HEAD
 
-=======
-@NoArgsConstructor
-@AllArgsConstructor
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 @Builder
 public class PsychologistSlot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer psychologistSlotId;
 
-<<<<<<< HEAD
     public Integer getPsychologistSlotId() {
         return psychologistSlotId;
     }
@@ -52,8 +46,7 @@ public class PsychologistSlot {
         this.availabilityStatus = availabilityStatus;
     }
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
     @ManyToOne
     @JoinColumn(name = "psycholId", nullable = false)
     private Psychologist psychologist;
@@ -64,7 +57,7 @@ public class PsychologistSlot {
 
     @Enumerated(EnumType.STRING)
     private AvailabilityStatus availabilityStatus;
-<<<<<<< HEAD
+
 
     public PsychologistSlot() {
     }
@@ -110,7 +103,6 @@ public class PsychologistSlot {
             return new PsychologistSlot(psychologistSlotId, psychologist, slot, availabilityStatus);
         }
     }
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
 }
 

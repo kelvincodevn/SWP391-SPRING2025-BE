@@ -1,13 +1,8 @@
 package be.mentalhealth.springboot_backend.DTO;
 
-<<<<<<< HEAD
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Data;
-
 import java.time.LocalDate;
-=======
-import lombok.Data;
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 import java.time.LocalDateTime;
 
 @Data
@@ -15,7 +10,7 @@ public class PsychologistDTO {
     private String userName;
     private String fullName;
     private String password;
-<<<<<<< HEAD
+
 
     public String getUserName() {
         return userName;
@@ -114,15 +109,7 @@ public class PsychologistDTO {
     private String avatar;
     private Float serviceFee;
     private LocalDateTime createdDate;
-=======
-    private String email;
 
-    private String phone;
-    private LocalDateTime dob;
-    private String gender;
-    private String avatar;
-    private Float serviceFee;
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 
     private PsychologistDetailDTO psychologistDetail;
 }

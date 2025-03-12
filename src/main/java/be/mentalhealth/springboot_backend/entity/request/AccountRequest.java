@@ -18,19 +18,13 @@ public class AccountRequest {
     @NotBlank(message = "Email is required")
     @Email(message = "Invalid email format")
     private String email;
-<<<<<<< HEAD
 
     @NotBlank(message = "Password is required")
     private String password;
 
     private RoleEnum roleEnum; // Mặc định nếu không truyền vào, sẽ là STUDENT
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 
-    @NotBlank(message = "Password is required")
-    private String password;
 
-<<<<<<< HEAD
     public void setFullName(String fullName) {
         this.fullName = fullName;
     }
@@ -66,7 +60,5 @@ public class AccountRequest {
     public void setEmail(String email) {
         this.email = email;
     }
-=======
-    private RoleEnum roleEnum; // Mặc định nếu không truyền vào, sẽ là STUDENT
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
 }

@@ -21,7 +21,6 @@ public class PsychologistDetail {
     @JsonBackReference
     private Psychologist psychologist;
 
-<<<<<<< HEAD
     public Integer getPsychologistDetailId() {
         return psychologistDetailId;
     }
@@ -62,8 +61,6 @@ public class PsychologistDetail {
         this.degree = degree;
     }
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     private String major;
     private String workplace;
     private String degree;

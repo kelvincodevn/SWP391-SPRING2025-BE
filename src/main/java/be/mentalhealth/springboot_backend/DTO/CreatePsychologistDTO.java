@@ -12,7 +12,6 @@ public class CreatePsychologistDTO {
     @NotBlank
     private String fullName;
 
-<<<<<<< HEAD
     public String getUserName() {
         return userName;
     }
@@ -45,8 +44,6 @@ public class CreatePsychologistDTO {
         this.email = email;
     }
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     @NotBlank
     private String password;
 

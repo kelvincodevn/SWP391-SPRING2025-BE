@@ -1,13 +1,11 @@
 package be.mentalhealth.springboot_backend.entity;
 
-<<<<<<< HEAD
 import jakarta.persistence.*;
-=======
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
 import lombok.*;
 
 import java.time.LocalDate;
@@ -16,26 +14,19 @@ import java.time.LocalTime;
 @Entity
 @Getter
 @Setter
-<<<<<<< HEAD
 
-=======
-@NoArgsConstructor
-@AllArgsConstructor
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
 @Builder
 public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-<<<<<<< HEAD
+
     @Column(name = "slot_id")
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     private Integer slotId;
 
     private LocalDate availableDate;
     private LocalTime startTime;
     private LocalTime endTime;
-<<<<<<< HEAD
+
 
     public Slot() {
     }
@@ -134,7 +125,3 @@ public class Slot {
     private boolean available = true; // Thêm cột này nếu chưa có
 
 }
-=======
-}
-
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c

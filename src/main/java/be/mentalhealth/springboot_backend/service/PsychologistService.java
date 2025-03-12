@@ -10,11 +10,9 @@ import be.mentalhealth.springboot_backend.repository.PsychologistRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-<<<<<<< HEAD
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
+
 import java.util.List;
 
 @Service
@@ -24,14 +22,11 @@ public class PsychologistService {
 
     private final PsychologistDetailRepository psychologistDetailRepository;
 
-<<<<<<< HEAD
     public PsychologistService(PsychologistRepository psychologistRepository, PsychologistDetailRepository psychologistDetailRepository) {
         this.psychologistRepository = psychologistRepository;
         this.psychologistDetailRepository = psychologistDetailRepository;
     }
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     public List<Psychologist> getAllPsychologists() {
         return psychologistRepository.findByStatusTrue();
     }
@@ -49,10 +44,7 @@ public class PsychologistService {
                 .password(dto.getPassword())
                 .email(dto.getEmail())
                 .status(true) // Mặc định active
-<<<<<<< HEAD
                 .createdDate(LocalDateTime.now())
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
                 .build();
 
         return psychologistRepository.save(psychologist);

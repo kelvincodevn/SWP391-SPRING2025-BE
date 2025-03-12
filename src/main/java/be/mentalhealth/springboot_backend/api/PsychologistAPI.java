@@ -21,13 +21,11 @@ import java.util.List;
 public class PsychologistAPI {
     private final PsychologistService psychologistService;
 
-<<<<<<< HEAD
+
     public PsychologistAPI(PsychologistService psychologistService) {
         this.psychologistService = psychologistService;
     }
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     @GetMapping
     public ResponseEntity<List<Psychologist>> getAllPsychologists() {
         return ResponseEntity.ok(psychologistService.getAllPsychologists());

@@ -22,15 +22,12 @@ public class SlotService {
     private final PsychologistRepository psychologistRepository;
     private final PsychologistSlotRepository psychologistSlotRepository;
 
-<<<<<<< HEAD
     public SlotService(SlotRepository slotRepository, PsychologistRepository psychologistRepository, PsychologistSlotRepository psychologistSlotRepository) {
         this.slotRepository = slotRepository;
         this.psychologistRepository = psychologistRepository;
         this.psychologistSlotRepository = psychologistSlotRepository;
     }
 
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
     public PsychologistSlot createSlot(Integer psychologistId, LocalDate date, LocalTime startTime, LocalTime endTime) {
         Psychologist psychologist = psychologistRepository.findById(psychologistId)
                 .orElseThrow(() -> new RuntimeException("Psychologist not found"));
@@ -39,10 +36,7 @@ public class SlotService {
                 .availableDate(date)
                 .startTime(startTime)
                 .endTime(endTime)
-<<<<<<< HEAD
                 .available(true)
-=======
->>>>>>> b4598932fd958f7395090188bcb5baf28566ac0c
                 .build();
         slot = slotRepository.save(slot);
 
