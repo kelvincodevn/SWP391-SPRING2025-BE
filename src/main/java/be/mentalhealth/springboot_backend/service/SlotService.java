@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
-@RequiredArgsConstructor
 public class SlotService {
     private final SlotRepository slotRepository;
     private final PsychologistRepository psychologistRepository;

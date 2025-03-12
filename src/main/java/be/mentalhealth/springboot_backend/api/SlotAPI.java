@@ -15,11 +15,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-@Slf4j
 @RestController
 @RequestMapping("/api/slots")
 @SecurityRequirement(name = "api")
-@RequiredArgsConstructor
 public class SlotAPI {
     private final SlotService slotService;
 

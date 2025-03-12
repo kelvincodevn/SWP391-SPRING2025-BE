@@ -17,7 +17,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/psychologists")
 @SecurityRequirement(name = "api")
-@RequiredArgsConstructor
 public class PsychologistAPI {
     private final PsychologistService psychologistService;
 

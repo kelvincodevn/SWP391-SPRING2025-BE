@@ -14,7 +14,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/surveys")
 @SecurityRequirement(name = "api")
-@RequiredArgsConstructor
 public class SurveyViewAPI {
     private final SurveyService surveyService;
 
