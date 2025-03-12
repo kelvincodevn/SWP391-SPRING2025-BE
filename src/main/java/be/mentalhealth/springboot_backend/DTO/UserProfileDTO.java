@@ -1,4 +1,4 @@
-package com.example.demo.DTO;
+package be.mentalhealth.springboot_backend.DTO;
 
 import jakarta.persistence.Column;
 

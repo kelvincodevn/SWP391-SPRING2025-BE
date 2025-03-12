@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package be.mentalhealth.springboot_backend.model;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;

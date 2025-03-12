@@ -1,7 +1,7 @@
-package com.example.demo.api.User;
+package be.mentalhealth.springboot_backend.api;
 
-import com.example.demo.DTO.UserProfileDTO;
-import com.example.demo.service.UserService;
+import be.mentalhealth.springboot_backend.DTO.UserProfileDTO;
+import be.mentalhealth.springboot_backend.service.UserService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

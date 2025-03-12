@@ -21,6 +21,12 @@ public class EmailService {
     private final SurveyRepository surveyRepository;
     private final SurveyEmailLogRepository surveyEmailLogRepository;
 
+    public EmailService(JavaMailSender mailSender, SurveyRepository surveyRepository, SurveyEmailLogRepository surveyEmailLogRepository) {
+        this.mailSender = mailSender;
+        this.surveyRepository = surveyRepository;
+        this.surveyEmailLogRepository = surveyEmailLogRepository;
+    }
+
     public List<SurveyEmailLog> sendSurveyEmails(String title, String description, List<String> emails, String surveyLink) {
         // Lưu survey vào DB
         Survey survey = new Survey();

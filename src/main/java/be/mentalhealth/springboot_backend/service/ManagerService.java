@@ -1,11 +1,11 @@
-package com.example.demo.service;
+package be.mentalhealth.springboot_backend.service;
 
-import com.example.demo.DTO.UserProfileDTO;
-import com.example.demo.Repository.AuthenticationRepository;
-import com.example.demo.Repository.ManagerRepository;
-import com.example.demo.entity.User;
+
+import be.mentalhealth.springboot_backend.entity.User;
+import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
+import be.mentalhealth.springboot_backend.repository.AuthenticationRepository;
+import be.mentalhealth.springboot_backend.repository.ManagerRepository;
 import org.modelmapper.ModelMapper;
-import com.example.demo.entity.request.AccountRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;

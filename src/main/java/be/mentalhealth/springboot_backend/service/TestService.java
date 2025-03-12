@@ -1,14 +1,14 @@
-package com.example.demo.service;
+package be.mentalhealth.springboot_backend.service;
 
-import com.example.demo.DTO.TestAnswerDTO;
-import com.example.demo.DTO.TestDetailsDTO;
-import com.example.demo.Repository.SetOfQuestionsRepository;
-import com.example.demo.Repository.TestAnswerRepository;
-import com.example.demo.Repository.TestsRepository;
-import com.example.demo.entity.SetOfQuestions;
-import com.example.demo.entity.TestAnswer;
-import com.example.demo.entity.Tests;
-import com.example.demo.model.ExcelRow;
+import be.mentalhealth.springboot_backend.DTO.TestAnswerDTO;
+import be.mentalhealth.springboot_backend.DTO.TestDetailsDTO;
+import be.mentalhealth.springboot_backend.entity.SetOfQuestions;
+import be.mentalhealth.springboot_backend.entity.TestAnswer;
+import be.mentalhealth.springboot_backend.entity.Tests;
+import be.mentalhealth.springboot_backend.model.ExcelRow;
+import be.mentalhealth.springboot_backend.repository.SetOfQuestionsRepository;
+import be.mentalhealth.springboot_backend.repository.TestAnswerRepository;
+import be.mentalhealth.springboot_backend.repository.TestsRepository;
 import jakarta.transaction.Transactional;
 import org.apache.poi.ss.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,9 +1,9 @@
-package com.example.demo.config;
+package be.mentalhealth.springboot_backend.config;
 
 
-import com.example.demo.entity.User;
-import com.example.demo.exception.exceptions.AuthorizeException;
-import com.example.demo.service.TokenService;
+import be.mentalhealth.springboot_backend.entity.User;
+import be.mentalhealth.springboot_backend.exception.exceptions.AuthorizeException;
+import be.mentalhealth.springboot_backend.service.TokenService;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.MalformedJwtException;
 import jakarta.servlet.FilterChain;
@@ -89,10 +89,7 @@ public class Filter extends OncePerRequestFilter {
     String getToken(HttpServletRequest request) {
         return request.getHeader("Authorization").substring(7);
     }
-    }
+}
 
 
 // Bearer ajsdalksjdk;asjdl;adsasjldak;
-
-
-

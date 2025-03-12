@@ -1,4 +1,4 @@
-package com.example.demo.exception.exceptions;
+package be.mentalhealth.springboot_backend.exception.exceptions;
 
 public class AuthorizeException extends RuntimeException {
 

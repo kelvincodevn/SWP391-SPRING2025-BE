@@ -1,6 +1,6 @@
-package com.example.demo.api;
+package be.mentalhealth.springboot_backend.api;
 
-import com.example.demo.model.Student;
+import be.mentalhealth.springboot_backend.model.Student;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

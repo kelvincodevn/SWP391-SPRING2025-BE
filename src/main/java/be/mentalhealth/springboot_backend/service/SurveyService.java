@@ -12,6 +12,10 @@ import java.util.List;
 public class SurveyService {
     private final SurveyRepository surveyRepository;
 
+    public SurveyService(SurveyRepository surveyRepository) {
+        this.surveyRepository = surveyRepository;
+    }
+
     public List<Survey> getAllSurveys() {
         return surveyRepository.findAll();
     }

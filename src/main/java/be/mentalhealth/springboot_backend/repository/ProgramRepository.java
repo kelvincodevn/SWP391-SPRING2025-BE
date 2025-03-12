@@ -1,7 +1,7 @@
-package com.example.demo.Repository;
+package be.mentalhealth.springboot_backend.repository;
 
 
-import com.example.demo.entity.Program;
+import be.mentalhealth.springboot_backend.entity.Program;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ProgramRepository extends JpaRepository <Program, Long> {

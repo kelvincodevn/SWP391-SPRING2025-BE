@@ -28,13 +28,13 @@ public class Account implements UserDetails {
     public String password; //ctrl + D
 
     @Enumerated(value = EnumType.STRING)
-    public RoleEnum roleEnum;
+    public be.mentalhealth.springboot_backend.enums.RoleEnum roleEnum;
 
-    public RoleEnum getRoleEnum() {
+    public be.mentalhealth.springboot_backend.enums.RoleEnum getRoleEnum() {
         return roleEnum;
     }
 
-    public void setRoleEnum(RoleEnum roleEnum) {
+    public void setRoleEnum(be.mentalhealth.springboot_backend.enums.RoleEnum roleEnum) {
         this.roleEnum = roleEnum;
     }
 

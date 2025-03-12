@@ -1,10 +1,9 @@
-package com.example.demo.service;
+package be.mentalhealth.springboot_backend.service;
 
-import com.example.demo.DTO.UserProfileDTO;
-import com.example.demo.Repository.AuthenticationRepository;
-import com.example.demo.Repository.ManagerRepository;
-import com.example.demo.Repository.UserRepository;
-import com.example.demo.entity.User;
+
+import be.mentalhealth.springboot_backend.DTO.UserProfileDTO;
+import be.mentalhealth.springboot_backend.entity.User;
+import be.mentalhealth.springboot_backend.repository.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;

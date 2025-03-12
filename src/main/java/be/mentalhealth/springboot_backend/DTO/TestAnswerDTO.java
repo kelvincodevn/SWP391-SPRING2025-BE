@@ -1,4 +1,4 @@
-package com.example.demo.DTO;
+package be.mentalhealth.springboot_backend.DTO;
 
 public class TestAnswerDTO {
     private int questionNumber;

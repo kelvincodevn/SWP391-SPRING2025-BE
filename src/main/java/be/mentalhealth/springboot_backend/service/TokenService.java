@@ -1,8 +1,8 @@
-package com.example.demo.service;
+package be.mentalhealth.springboot_backend.service;
 
-import com.example.demo.Repository.AuthenticationRepository;
 
-import com.example.demo.entity.User;
+import be.mentalhealth.springboot_backend.entity.User;
+import be.mentalhealth.springboot_backend.repository.AuthenticationRepository;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.io.Decoders;

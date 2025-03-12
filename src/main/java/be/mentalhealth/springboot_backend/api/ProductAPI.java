@@ -1,7 +1,8 @@
-package com.example.demo.api;
+package be.mentalhealth.springboot_backend.api;
 
-import com.example.demo.entity.Product;
-import com.example.demo.service.ProductService;
+
+import be.mentalhealth.springboot_backend.entity.Product;
+import be.mentalhealth.springboot_backend.service.ProductService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import jakarta.validation.Valid;

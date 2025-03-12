@@ -1,7 +1,8 @@
-package com.example.demo.service;
+package be.mentalhealth.springboot_backend.service;
 
-import com.example.demo.Repository.ProductRepository;
-import com.example.demo.entity.Product;
+
+import be.mentalhealth.springboot_backend.entity.Product;
+import be.mentalhealth.springboot_backend.repository.ProductRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
