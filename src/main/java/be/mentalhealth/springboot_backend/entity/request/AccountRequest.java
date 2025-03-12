@@ -24,9 +24,6 @@ public class AccountRequest {
 
     private RoleEnum roleEnum; // Mặc định nếu không truyền vào, sẽ là STUDENT
 
-    public String getFullName() {
-        return fullName;
-    }
 
     public void setFullName(String fullName) {
         this.fullName = fullName;
@@ -63,4 +60,5 @@ public class AccountRequest {
     public void setEmail(String email) {
         this.email = email;
     }
+
 }

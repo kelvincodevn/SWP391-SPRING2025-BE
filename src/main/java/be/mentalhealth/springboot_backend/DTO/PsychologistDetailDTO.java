@@ -10,12 +10,12 @@ public class PsychologistDetailDTO {
     private String workplace;
     private String degree;
 
-
     public PsychologistDetailDTO(String major, String workplace, String degree) {
         this.major = major;
         this.workplace = workplace;
         this.degree = degree;
     }
+
 
     private PsychologistDetailDTO(PsychologistDetailDTOBuilder builder) {
         this.major = builder.major;

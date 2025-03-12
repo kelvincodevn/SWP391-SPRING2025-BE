@@ -13,5 +13,6 @@ import java.util.Optional;
 public interface PsychologistSlotRepository extends JpaRepository<PsychologistSlot, Integer> {
     List<PsychologistSlot> findByAvailabilityStatus(AvailabilityStatus status);
 
+
     Optional<PsychologistSlot> findBySlot(Slot slot);
 }

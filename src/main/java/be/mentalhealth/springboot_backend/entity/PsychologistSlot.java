@@ -101,5 +101,6 @@ public class PsychologistSlot {
             return new PsychologistSlot(psychologistSlotId, psychologist, slot, availabilityStatus);
         }
     }
+
 }
 

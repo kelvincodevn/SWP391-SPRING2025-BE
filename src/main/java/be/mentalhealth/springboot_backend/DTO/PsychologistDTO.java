@@ -12,6 +12,7 @@ public class PsychologistDTO {
     private String fullName;
     private String password;
 
+
     public String getUserName() {
         return userName;
     }

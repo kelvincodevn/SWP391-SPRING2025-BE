@@ -1,6 +1,12 @@
 package be.mentalhealth.springboot_backend.entity;
 
 import jakarta.persistence.*;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+
 import lombok.*;
 
 import java.time.LocalDate;
@@ -14,6 +20,7 @@ import java.time.LocalTime;
 public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+
     @Column(name = "slot_id")
     private Integer slotId;
 
