@@ -1,11 +1,11 @@
 package com.example.demo.entity;
 
+import com.example.demo.DTO.UserDTO;
 import com.example.demo.enums.RoleEnum;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
-import be.mentalhealth.springboot_backend.DTO.UserDTO;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;

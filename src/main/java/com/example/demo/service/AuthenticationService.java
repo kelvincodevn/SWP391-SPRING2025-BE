@@ -3,6 +3,7 @@ package com.example.demo.service;
 
 import com.example.demo.Repository.AuthenticationRepository;
 
+import com.example.demo.Repository.UserRepository;
 import com.example.demo.entity.User;
 import com.example.demo.entity.request.AccountRequest;
 import com.example.demo.entity.request.AuthenticationRequest;
@@ -14,6 +15,7 @@ import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -27,6 +29,9 @@ import java.util.List;
 public class AuthenticationService implements UserDetailsService {
     @Autowired
     AuthenticationRepository authenticationRepository;
+    @Autowired
+    UserRepository userRepository;
+
     @Autowired
     PasswordEncoder passwordEncoder;
 
@@ -126,5 +131,12 @@ public class AuthenticationService implements UserDetailsService {
 
          return authenticationResponse;
 
+    }
+
+    public Long getLoggedInUserId() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        return user.getUserID();
     }
 }

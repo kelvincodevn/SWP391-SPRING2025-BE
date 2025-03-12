@@ -66,6 +66,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/student/**").hasAuthority("STUDENT")
                     .requestMatchers("/api/parent/**").hasAuthority("PARENT")
                     .requestMatchers("/api/psychologist/**").hasAuthority("PSYCHOLOGIST")
+                    .requestMatchers("/api/user/**").permitAll() // Các API chung
                     .requestMatchers("/**").permitAll() // Các API chung
                     .requestMatchers("/api/auth/**").permitAll() // Các API xác thực
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()

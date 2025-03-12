@@ -2,23 +2,22 @@ package com.example.demo.DTO;
 
 import java.util.List;
 
-public class TestDetailsDTO {
+public class TestListDTO {
     private Long testId;
     private String testName;
-    private String testType;
+    private String testDescription;
     private int totalQuestions;
-    private List<TestAnswerDTO> answers;
+    private List<QuestionDTO> questions; // Using QuestionDTO to hold grouped answers
 
-    public TestDetailsDTO(Long testId, String testName, String testType, int totalQuestions, List<TestAnswerDTO> answers) {
+    public TestListDTO(Long testId, String testName, String testDescription, int totalQuestions, List<QuestionDTO> questions) {
         this.testId = testId;
         this.testName = testName;
-        this.testType = testType;
+        this.testDescription = testDescription;
         this.totalQuestions = totalQuestions;
-        this.answers = answers;
+        this.questions = questions;
     }
 
-    // Getters & Setters
-
+    // Getters and Setters
     public Long getTestId() {
         return testId;
     }
@@ -35,12 +34,12 @@ public class TestDetailsDTO {
         this.testName = testName;
     }
 
-    public String getTestType() {
-        return testType;
+    public String getTestDescription() {
+        return testDescription;
     }
 
-    public void setTestType(String testType) {
-        this.testType = testType;
+    public void setTestDescription(String testDescription) {
+        this.testDescription = testDescription;
     }
 
     public int getTotalQuestions() {
@@ -51,12 +50,11 @@ public class TestDetailsDTO {
         this.totalQuestions = totalQuestions;
     }
 
-    public List<TestAnswerDTO> getAnswers() {
-        return answers;
+    public List<QuestionDTO> getQuestions() {
+        return questions;
     }
 
-    public void setAnswers(List<TestAnswerDTO> answers) {
-        this.answers = answers;
+    public void setQuestions(List<QuestionDTO> questions) {
+        this.questions = questions;
     }
 }
-
