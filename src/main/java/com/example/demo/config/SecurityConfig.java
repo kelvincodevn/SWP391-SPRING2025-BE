@@ -39,23 +39,41 @@ public class SecurityConfig {
         return authenticationConfiguration.getAuthenticationManager();
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
+//    @Bean
+//    public SecurityFilterChain securityFilterChain(HttpSecurity http)  throws Exception {
+//        return http
+//                .cors().and() //lỗi version quá mới (ko sao kệ)
+//                .csrf(AbstractHttpConfigurer::disable)
+//                .authorizeHttpRequests(auth -> auth
+////                        .requestMatchers("/Manager/**").hasRole("MANAGER")  // Chỉ admin truy cập được
+//                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+//                        .requestMatchers("/**").permitAll() // /** các đường dẫn sau dấu / cho permit All
+//                        .anyRequest().authenticated()
+//                )
+//                .userDetailsService(authenticationService)
+//                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+//                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+//                .build();
+//    }
+
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
-                .cors().and() //lỗi version quá mới (ko sao kệ)
-                .csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(auth -> auth
-//                        .requestMatchers("/Manager/**").hasRole("MANAGER")  // Chỉ admin truy cập được
-                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers("/**").permitAll() // /** các đường dẫn sau dấu / cho permit All
-                        .anyRequest().authenticated()
-                )
-                .userDetailsService(authenticationService)
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
-                .build();
-    }
-
-
-
+            .cors().and()
+            .csrf(AbstractHttpConfigurer::disable)
+            .authorizeHttpRequests(auth -> auth
+                    .requestMatchers("/api/manager/**").hasAuthority("MANAGER")
+                    .requestMatchers("/api/student/**").hasAuthority("STUDENT")
+                    .requestMatchers("/api/parent/**").hasAuthority("PARENT")
+                    .requestMatchers("/api/psychologist/**").hasAuthority("PSYCHOLOGIST")
+                    .requestMatchers("/**").permitAll() // Các API chung
+                    .requestMatchers("/api/auth/**").permitAll() // Các API xác thực
+                    .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                    .anyRequest().authenticated()
+            )
+            .userDetailsService(authenticationService)
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
+            .build();
+        }
 }

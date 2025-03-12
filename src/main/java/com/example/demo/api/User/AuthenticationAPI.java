@@ -8,13 +8,11 @@ import com.example.demo.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("api")
+@RequestMapping("api/auth")
+//@CrossOrigin(origins = "http://localhost:5173")
 public class AuthenticationAPI {
     @Autowired
     AuthenticationService authenticationService;
@@ -23,6 +21,7 @@ public class AuthenticationAPI {
     public ResponseEntity register(@Valid @RequestBody AccountRequest user){
         User newUser = authenticationService.register(user);
         return ResponseEntity.ok(newUser);
+        //HttpStatus.CREATED (200)
     }
 
     @PostMapping("login")

@@ -1,10 +1,21 @@
 package com.example.demo.entity.request;
 
+import com.example.demo.enums.RoleEnum;
+
 public class AccountRequest {
     public String fullName;
     public String username;
     public String email;
     public String password;
+    public RoleEnum roleEnum;
+
+    public RoleEnum getRoleEnum() {
+        return roleEnum;
+    }
+
+    public void setRoleEnum(RoleEnum roleEnum) {
+        this.roleEnum = roleEnum;
+    }
 
     public String getUsername() {
         return username;

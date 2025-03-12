@@ -12,11 +12,16 @@ import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -31,27 +36,52 @@ public class AuthenticationService implements UserDetailsService {
     @Autowired
     TokenService tokenService;
 
-    public User register(AccountRequest accountRequest){
-        //xử lý logic
+//    public User register(AccountRequest accountRequest){
+//        //xử lý logic
+//
+//        //lưu xuống db
+//
+//        User user = new User();
+//
+//        user.setUserName(accountRequest.getUsername());
+//        user.setRoleEnum(RoleEnum.STUDENT);
+//        user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
+//        user.setFullName(accountRequest.getFullName());
+//        user.setEmail(accountRequest.getEmail());
+//
+//        User newUser = authenticationRepository.save(user);
+//        return newUser;
+//    }
 
-        //lưu xuống db
-
+    public User register(AccountRequest accountRequest) {
         User user = new User();
-
-        user.setUserName(accountRequest.getUsername());
-        user.setRoleEnum(RoleEnum.STUDENT);
+        user.setUsername(accountRequest.getUsername());
+        user.setRoleEnum(accountRequest.getRoleEnum()); // Lấy vai trò từ request
         user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
         user.setFullName(accountRequest.getFullName());
         user.setEmail(accountRequest.getEmail());
-
-        User newUser = authenticationRepository.save(user);
-        return newUser;
+        return authenticationRepository.save(user);
     }
 
 
+//    @Override
+//    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+//        return authenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
+//    }
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return authenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
+        User user = authenticationRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + username));
+
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(user.getRoleEnum().name())); // Thêm vai trò
+
+        return new org.springframework.security.core.userdetails.User(
+                user.getUsername(),
+                user.getPassword(),
+                authorities
+        );
     }
 
     public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {

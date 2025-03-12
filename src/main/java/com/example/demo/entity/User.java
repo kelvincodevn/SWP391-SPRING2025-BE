@@ -3,11 +3,14 @@ package com.example.demo.entity;
 import com.example.demo.enums.RoleEnum;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import be.mentalhealth.springboot_backend.DTO.UserDTO;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -49,6 +52,13 @@ public class User implements UserDetails {
     @Enumerated(value = EnumType.STRING)
     public RoleEnum roleEnum;
 
+    @Transient // Không lưu vào database
+    private List<GrantedAuthority> authorities;
+
+    public void setAuthorities(List<GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
     public boolean isDeleted = false;
 
     public RoleEnum getRoleEnum() {
@@ -84,7 +94,10 @@ public class User implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // Adjust if using roles
+        List<GrantedAuthority> authorities = new ArrayList<>();
+        authorities.add(new SimpleGrantedAuthority(roleEnum.name())); // Thêm vai trò vào danh sách
+
+        return authorities;
     }
 
     @Override

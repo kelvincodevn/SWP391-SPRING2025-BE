@@ -3,6 +3,8 @@ package com.example.demo.api.Manager;
 import com.example.demo.entity.Tests;
 import com.example.demo.entity.User;
 import com.example.demo.entity.request.AccountRequest;
+import com.example.demo.enums.RoleEnum;
+import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.ManagerService;
 import com.example.demo.service.TestService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,14 +12,19 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 @RestController
-@RequestMapping("/api/Manager")
+@RequestMapping("/api/manager")
 @SecurityRequirement(name = "api")
+@PreAuthorize("hasAuthority('MANAGER')") // Chỉ MANAGER amới có quyền truy cập
 public class ManagerAPI {
+
+    @Autowired
+    AuthenticationService authenticationService;
 
     @Autowired
     ManagerService managerService;
@@ -39,7 +46,12 @@ public class ManagerAPI {
         return managerService.updateUser(id, user);
     }
 
-
+    @PostMapping("/register-psychologist")
+    public ResponseEntity<User> registerPsychologist(@RequestBody AccountRequest accountRequest) {
+        accountRequest.setRoleEnum(RoleEnum.PSYCHOLOGIST);
+        User psychologist = authenticationService.register(accountRequest);
+        return ResponseEntity.ok(psychologist);
+    }
 
 
 }
