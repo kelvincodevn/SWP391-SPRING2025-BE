@@ -1,6 +1,6 @@
-package com.example.demo.exception;
+package be.mentalhealth.springboot_backend.exception;
 
-import com.example.demo.exception.exceptions.AuthorizeException;
+import be.mentalhealth.springboot_backend.exception.exceptions.AuthorizeException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.FieldError;

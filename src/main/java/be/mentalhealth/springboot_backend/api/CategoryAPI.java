@@ -1,4 +1,4 @@
-package com.example.demo.api;
+package be.mentalhealth.springboot_backend.api;
 
 public class CategoryAPI {
 }

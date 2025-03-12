@@ -1,6 +1,7 @@
-package com.example.demo.entity;
+package be.mentalhealth.springboot_backend.entity;
 
-import com.example.demo.enums.RoleEnum;
+
+import be.mentalhealth.springboot_backend.enums.RoleEnum;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

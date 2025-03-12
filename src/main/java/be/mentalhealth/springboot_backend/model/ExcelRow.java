@@ -1,4 +1,4 @@
-package com.example.demo.model;
+package be.mentalhealth.springboot_backend.model;
 
 public class ExcelRow {
     private String testName;

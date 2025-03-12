@@ -1,13 +1,13 @@
-package com.example.demo.service;
+package be.mentalhealth.springboot_backend.service;
 
 
-import com.example.demo.Repository.AuthenticationRepository;
 
-import com.example.demo.entity.User;
-import com.example.demo.entity.request.AccountRequest;
-import com.example.demo.entity.request.AuthenticationRequest;
-import com.example.demo.entity.response.AuthenticationResponse;
-import com.example.demo.enums.RoleEnum;
+import be.mentalhealth.springboot_backend.entity.User;
+import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
+import be.mentalhealth.springboot_backend.entity.request.AuthenticationRequest;
+import be.mentalhealth.springboot_backend.entity.response.AuthenticationResponse;
+import be.mentalhealth.springboot_backend.enums.RoleEnum;
+import be.mentalhealth.springboot_backend.repository.AuthenticationRepository;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;

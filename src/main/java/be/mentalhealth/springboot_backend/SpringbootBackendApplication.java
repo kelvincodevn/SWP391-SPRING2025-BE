@@ -1,5 +1,5 @@
 
-package com.example.demo;
+package be.mentalhealth.springboot_backend;
 
 import io.swagger.v3.oas.annotations.OpenAPIDefinition;
 import io.swagger.v3.oas.annotations.enums.SecuritySchemeIn;
@@ -13,8 +13,8 @@ import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 
 @SpringBootApplication
 @EntityScan
-@EnableJpaRepositories(basePackages = "com.example.demo.repository")
 @SecurityScheme(name = "api", scheme = "bearer", type = SecuritySchemeType.HTTP, in = SecuritySchemeIn.HEADER)
+@EnableJpaRepositories(basePackages = "be.mentalhealth.springboot_backend.repository")
 @OpenAPIDefinition(info = @Info(title = "psychological health", version = "1.0", description = "API"))
 public class SpringbootBackendApplication {
 

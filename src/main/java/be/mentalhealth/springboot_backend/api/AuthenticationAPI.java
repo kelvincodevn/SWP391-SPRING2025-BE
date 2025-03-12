@@ -1,10 +1,11 @@
-package com.example.demo.api.User;
+package be.mentalhealth.springboot_backend.api;
 
-import com.example.demo.entity.User;
-import com.example.demo.entity.request.AccountRequest;
-import com.example.demo.entity.request.AuthenticationRequest;
-import com.example.demo.entity.response.AuthenticationResponse;
-import com.example.demo.service.AuthenticationService;
+
+import be.mentalhealth.springboot_backend.entity.User;
+import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
+import be.mentalhealth.springboot_backend.entity.request.AuthenticationRequest;
+import be.mentalhealth.springboot_backend.entity.response.AuthenticationResponse;
+import be.mentalhealth.springboot_backend.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;

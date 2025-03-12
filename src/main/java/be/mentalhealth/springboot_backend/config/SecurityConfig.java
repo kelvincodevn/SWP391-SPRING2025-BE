@@ -1,6 +1,6 @@
-package com.example.demo.config;
+package be.mentalhealth.springboot_backend.config;
 
-import com.example.demo.service.AuthenticationService;
+import be.mentalhealth.springboot_backend.service.AuthenticationService;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -46,9 +46,9 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
 //                        .requestMatchers("/Manager/**").hasRole("MANAGER")  // Chỉ admin truy cập được
-                        .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
-                        .requestMatchers("/**").permitAll() // /** các đường dẫn sau dấu / cho permit All
-                        .anyRequest().authenticated()
+                                .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
+                                .requestMatchers("/**").permitAll() // /** các đường dẫn sau dấu / cho permit All
+                                .anyRequest().authenticated()
                 )
                 .userDetailsService(authenticationService)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
