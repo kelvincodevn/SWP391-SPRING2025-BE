@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.*;
@@ -39,7 +40,7 @@ public class UserTestAPI {
     private TestResultRepository testResultRepository;
 
 
-     @GetMapping
+    @GetMapping
     public List<Tests> getAllTests() {
         return testService.getAllTests();
     }
@@ -97,8 +98,15 @@ public class UserTestAPI {
 
 
     @GetMapping("/results")
-    public ResponseEntity<List<TestResult>> getAllUserTestResults() {
-        List<TestResult> results = testResultRepository.findAll();
+    public ResponseEntity<List<TestResult>> getUserTestResults(@AuthenticationPrincipal UserDetails userDetails) {
+        if (userDetails == null) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        }
+
+        String username = userDetails.getUsername(); // Get the logged-in user's username
+        List<TestResult> results = testResultRepository.findByUserUsername(username); // Fetch only user's tests
+
         return ResponseEntity.ok(results);
     }
+
 }

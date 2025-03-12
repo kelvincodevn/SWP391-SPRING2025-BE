@@ -17,6 +17,8 @@ public interface TestsRepository extends JpaRepository<Tests, Long> {
     @Query("SELECT t FROM Tests t WHERE t.testsName = :testsName")
     Tests searchByTestsName(@Param("testNames") String testsName);
 
+    List<Tests> findByIsDeletedFalse();
+
 
     Optional<Tests> findById(Long id);
 

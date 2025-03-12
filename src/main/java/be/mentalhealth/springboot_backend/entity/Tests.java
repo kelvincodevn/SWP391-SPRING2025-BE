@@ -17,23 +17,45 @@ import java.util.List;
     private String testsName;
     private String testsDescription;
 
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
     @Version
     private Integer version;
 
-        public Tests(Long maxTestId, String testsName, String testsDescription) {
-            this.testsName = testsName;
-            this.testsDescription = testsDescription;
-        }
 
     @JsonIgnore
     @OneToMany(mappedBy = "tests", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SetOfQuestions> questions = new ArrayList<>();
 
 
-    public Tests() {
+        public Tests(long id, String testsName, String testsDescription, boolean isDeleted, Integer version, List<SetOfQuestions> questions) {
+            this.id = id;
+            this.testsName = testsName;
+            this.testsDescription = testsDescription;
+            this.isDeleted = isDeleted;
+            this.version = version;
+            this.questions = questions;
+        }
+        public Tests() {
     }
 
-    public long getId() {
+        public boolean isDeleted() {
+            return isDeleted;
+        }
+
+        public void setDeleted(boolean deleted) {
+            isDeleted = deleted;
+        }
+
+        public List<SetOfQuestions> getQuestions() {
+            return questions;
+        }
+
+        public void setQuestions(List<SetOfQuestions> questions) {
+            this.questions = questions;
+        }
+        public long getId() {
         return id;
     }
 

@@ -39,22 +39,29 @@ public class TestService {
     List<TestAnswerDTO> uniqueAnswers = new ArrayList<>(uniqueAnswersMap.values());
 
     public List<Tests> getAllTests() {
-        return testsRepository.findAll();
+        return testsRepository.findByIsDeletedFalse();
     }
 
     public ResponseEntity<?> getTestDetails(Long testsId) {
         Optional<Tests> testOptional = testsRepository.findById(testsId);
+
         if (testOptional.isEmpty()) {
             return ResponseEntity.badRequest().body("Test with ID " + testsId + " not found.");
         }
 
         Tests test = testOptional.get();
+
+        // Check if the test is deleted
+        if (test.isDeleted()) {
+            return ResponseEntity.badRequest().body("Test with ID " + testsId + " has been deleted.");
+        }
+
         List<SetOfQuestions> questions = setOfQuestionsRepository.findByTests(test);
 
         // Process questions and answers
         List<QuestionDTO> questionList = questions.stream()
                 .map(q -> new QuestionDTO(
-                        q.getQuestionNumber(),  // Use existing question number
+                        q.getQuestionNumber(),
                         q.getQuestionText(),
                         testAnswerRepository.findByQuestionIn(Collections.singletonList(q)).stream()
                                 .map(a -> new AnswerDTO(a.getAnswer(), a.getScore()))
@@ -72,6 +79,7 @@ public class TestService {
 
         return ResponseEntity.ok(testDetails);
     }
+
 
     @Transactional
     public ResponseEntity<String> submitTest(UserAnswersRequestDTO submission, User user) {
@@ -289,13 +297,23 @@ public class TestService {
         };
     }
 
+    @Transactional
     public ResponseEntity<String> deleteTest(Long id) {
         if (!testsRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body("Tests not found with ID: " + id);
+            return ResponseEntity.badRequest().body("Test not found with ID: " + id);
         }
-        testsRepository.deleteById(id);
-        return ResponseEntity.ok("Deleted test with ID: " + id);
+
+        // Retrieve the test and mark it as deleted
+        Tests test = testsRepository.findById(id).orElse(null);
+        if (test != null) {
+            test.setDeleted(true);
+            testsRepository.save(test);
+        }
+
+        return ResponseEntity.ok("Marked test as deleted with ID: " + id);
     }
+
+
 }
 
 
