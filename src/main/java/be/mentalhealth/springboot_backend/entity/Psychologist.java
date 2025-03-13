@@ -16,7 +16,6 @@ import java.time.LocalDateTime;
 
 
 @Builder
-
 public class Psychologist {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -27,7 +26,6 @@ public class Psychologist {
     private String fullName;
     private String email;
     private String phone;
-
     @JsonFormat(pattern = "dd-MM-yyyy")
     private LocalDate dob;
     private String gender;
@@ -281,5 +279,4 @@ public class Psychologist {
     public void setPsychologistDetail(PsychologistDetail psychologistDetail) {
         this.psychologistDetail = psychologistDetail;
     }
-
 }

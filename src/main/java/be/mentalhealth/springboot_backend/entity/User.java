@@ -52,6 +52,25 @@ public class User implements UserDetails {
 
     public boolean isDeleted = false;
 
+    private String otpCode;
+    private LocalDateTime otpExpiration;
+
+    public String getOtpCode() {
+        return otpCode;
+    }
+
+    public void setOtpCode(String otpCode) {
+        this.otpCode = otpCode;
+    }
+
+    public LocalDateTime getOtpExpiration() {
+        return otpExpiration;
+    }
+
+    public void setOtpExpiration(LocalDateTime otpExpiration) {
+        this.otpExpiration = otpExpiration;
+    }
+
     public RoleEnum getRoleEnum() {
         return roleEnum;
     }
@@ -202,6 +221,8 @@ public class User implements UserDetails {
         this.gender = gender;
         this.avatar = avatar;
         this.roleEnum = roleEnum;
+        this.otpCode = otpCode;
+        this.otpExpiration = otpExpiration;
     }
 
     public User() {
@@ -212,5 +233,12 @@ public class User implements UserDetails {
     }
 
     public void updateUser(UserDTO request) {
+    }
+
+    public boolean isOtpValid(String otp) {
+        return this.otpCode != null &&
+                this.otpCode.equals(otp) &&
+                this.otpExpiration != null &&
+                this.otpExpiration.isAfter(LocalDateTime.now());
     }
 }

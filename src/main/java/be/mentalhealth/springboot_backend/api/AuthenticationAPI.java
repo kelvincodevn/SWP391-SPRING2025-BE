@@ -4,10 +4,13 @@ package be.mentalhealth.springboot_backend.api;
 import be.mentalhealth.springboot_backend.entity.User;
 import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
 import be.mentalhealth.springboot_backend.entity.request.AuthenticationRequest;
+import be.mentalhealth.springboot_backend.entity.request.VerifyOtpRequest;
 import be.mentalhealth.springboot_backend.entity.response.AuthenticationResponse;
+import be.mentalhealth.springboot_backend.entity.response.MessageResponse;
 import be.mentalhealth.springboot_backend.service.AuthenticationService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,5 +33,14 @@ public class AuthenticationAPI {
     public ResponseEntity login(@RequestBody AuthenticationRequest authenticationRequest){
     AuthenticationResponse authenticationResponse = authenticationService.login(authenticationRequest);
     return ResponseEntity.ok(authenticationResponse);
+    }
+
+    @PostMapping("verify-otp")
+    public ResponseEntity<String> verifyOtp(@RequestBody VerifyOtpRequest request) {
+        boolean isValid = authenticationService.verifyOtp(request.getUsername(), request.getOtp());
+        if (isValid) {
+            return ResponseEntity.ok("OTP is valid, account verified.");
+        }
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid OTP or expired.");
     }
 }
