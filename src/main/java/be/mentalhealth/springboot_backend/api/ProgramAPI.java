@@ -1,5 +1,7 @@
 package be.mentalhealth.springboot_backend.api;
 
+import be.mentalhealth.springboot_backend.DTO.ProgramDTO;
+import be.mentalhealth.springboot_backend.DTO.ProgramViewDTO;
 import be.mentalhealth.springboot_backend.service.ProgramService;
 import be.mentalhealth.springboot_backend.entity.Program;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,32 +12,38 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 @RestController
-@RequestMapping("/Manager/api/Program")
+@RequestMapping("/api/Program")
 @SecurityRequirement(name = "api")
 public class ProgramAPI {
     @Autowired
     ProgramService programService;
 
-    @PostMapping
-    public ResponseEntity createProgram(@Valid @RequestBody Program program){
+    @PostMapping("Manager")
+    public ResponseEntity createProgram(@Valid @RequestBody ProgramDTO program){
         Program newProgram = programService.createProgram(program);
         return ResponseEntity.ok(program);
     }
 
-    @GetMapping
-    public ResponseEntity getAllProgram(){
-        List<Program> programs = programService.getAllProgram();
+    @GetMapping("Manager")
+    public ResponseEntity getAllProgramForManager(){
+        List<ProgramViewDTO> programs = programService.getAllPrograms();
         return ResponseEntity.ok(programs);
     }
 
-    @DeleteMapping("{id}")
+    @DeleteMapping("/Manager/{id}")
     public ResponseEntity deleteProgram(@PathVariable long id){
         Program program = programService.deleteProgram(id);
         return ResponseEntity.ok(program);
     }
 
-    @PutMapping("{id}")
+    @PutMapping("/Manager/{id}")
     public Program updateProgram(@PathVariable Long id, @RequestBody Program program) {
         return programService.updateProgram(id, program);
+    }
+
+    @GetMapping("User")
+    public ResponseEntity getAllProgramForUser(){
+        List<ProgramViewDTO> programs = programService.getAllPrograms();
+        return ResponseEntity.ok(programs);
     }
 }

@@ -1,40 +1,22 @@
-package be.mentalhealth.springboot_backend.entity;
+package be.mentalhealth.springboot_backend.DTO;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "programs")
-public class Program {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long programID;
-
-
+public class ProgramDTO {
     private String programName;
-
-
     private String programCategory;
-
-
     private String programDescription;
+    private boolean isDeleted;
 
-    public boolean isDeleted = false;
+    // Constructors
+    public ProgramDTO() {}
 
-    public Program() {
-    }
-
-    public Program(Long programId, String programName, String programCategory, String programDescription) {
-        this.programID = programId;
+    public ProgramDTO(String programName, String programCategory, String programDescription, boolean isDeleted) {
         this.programName = programName;
         this.programCategory = programCategory;
         this.programDescription = programDescription;
+        this.isDeleted = isDeleted;
     }
 
-    public Long getProgramId() {
-        return programID;
-    }
-
+    // Getters and Setters
     public String getProgramName() {
         return programName;
     }

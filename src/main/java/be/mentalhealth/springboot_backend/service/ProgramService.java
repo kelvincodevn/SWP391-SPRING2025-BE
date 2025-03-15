@@ -1,5 +1,7 @@
 package be.mentalhealth.springboot_backend.service;
 
+import be.mentalhealth.springboot_backend.DTO.ProgramDTO;
+import be.mentalhealth.springboot_backend.DTO.ProgramViewDTO;
 import be.mentalhealth.springboot_backend.Repository.ProgramRepository;
 import be.mentalhealth.springboot_backend.entity.Program;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -7,25 +9,39 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class ProgramService {
 
     @Autowired
     ProgramRepository programRepository;
 
-    public List<Program> getAllProgram() {
-        return programRepository.findAll();
+    public List<ProgramViewDTO> getAllPrograms() {
+        List<Program> programs = programRepository.findByIsDeletedFalse();
+
+        return programs.stream()
+                .map(p -> new ProgramViewDTO(p.getProgramName(), p.getProgramCategory(), p.getProgramDescription()))
+                .collect(Collectors.toList());
     }
 
-    public Program createProgram(Program program) {
-        Program newProgram = null;  // Khai báo biến trước
+
+    public Program createProgram(ProgramDTO programDTO) {
         try {
-            newProgram = programRepository.save(program);
+            Program program = new Program();
+            program.setProgramName(programDTO.getProgramName());
+            program.setProgramCategory(programDTO.getProgramCategory());
+            program.setProgramDescription(programDTO.getProgramDescription());
+            program.setDeleted(programDTO.isDeleted());
+
+            return programRepository.save(program);
         } catch (Exception e) {
             System.err.println("Error saving program: " + e.getMessage());
+            return null; // Return null if there's an error
         }
-        return newProgram;  // Trả về null nếu có lỗi
     }
+
+
 
 
     public Program deleteProgram(long id) {
