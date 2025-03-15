@@ -1,5 +1,4 @@
-package be.mentalhealth.springboot_backend.api.User;
-
+package be.mentalhealth.springboot_backend.api;
 
 import be.mentalhealth.springboot_backend.DTO.UserAnswersRequestDTO;
 import be.mentalhealth.springboot_backend.Repository.*;

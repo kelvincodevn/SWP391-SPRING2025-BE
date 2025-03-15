@@ -1,4 +1,5 @@
-package be.mentalhealth.springboot_backend.api.Manager;
+package be.mentalhealth.springboot_backend.api;
+
 
 import be.mentalhealth.springboot_backend.service.ManagerService;
 import be.mentalhealth.springboot_backend.entity.User;

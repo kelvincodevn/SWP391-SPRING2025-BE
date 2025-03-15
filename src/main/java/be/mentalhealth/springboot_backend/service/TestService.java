@@ -249,12 +249,9 @@ public class TestService {
             if (isEmptyRow(row)) continue;
             ExcelRow excelRow = new ExcelRow(
                     getStringValue(row.getCell(0)),  // testName
-                    getNumericValue(row.getCell(6)), // questionNumber (số thứ tự câu hỏi)
                     getStringValue(row.getCell(1)),  // questionText
                     getStringValue(row.getCell(2)),  // answerText
-                    getNumericValue(row.getCell(3)), // maxScore
-                    getNumericValue(row.getCell(4)), // questionId
-                    getNumericValue(row.getCell(5))  // resultId
+                    getNumericValue(row.getCell(3)) // maxScore
             );
             testDataMap.computeIfAbsent(excelRow.getTestName(), k -> new ArrayList<>()).add(excelRow);
         }

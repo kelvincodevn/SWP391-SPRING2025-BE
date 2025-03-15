@@ -1,4 +1,4 @@
-package be.mentalhealth.springboot_backend.api.Manager;
+package be.mentalhealth.springboot_backend.api;
 
 import be.mentalhealth.springboot_backend.service.ProgramService;
 import be.mentalhealth.springboot_backend.entity.Program;
