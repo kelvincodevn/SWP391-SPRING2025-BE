@@ -2,17 +2,28 @@ package be.mentalhealth.springboot_backend.DTO;
 
 public class ProgramViewDTO {
 
+    private Long programID;
     private String programName;
     private String programCategory;
-    private String programDescription;
+
 
     // Constructors
-    public ProgramViewDTO() {}
+    public ProgramViewDTO() {
 
-    public ProgramViewDTO(String programName, String programCategory, String programDescription) {
+    }
+
+    public ProgramViewDTO(Long programID, String programName, String programCategory) {
+        this.programID = programID;
         this.programName = programName;
         this.programCategory = programCategory;
-        this.programDescription = programDescription;
+    }
+
+    public Long getProgramID() {
+        return programID;
+    }
+
+    public void setProgramID(Long programID) {
+        this.programID = programID;
     }
 
     // Getters and Setters
@@ -32,12 +43,5 @@ public class ProgramViewDTO {
         this.programCategory = programCategory;
     }
 
-    public String getProgramDescription() {
-        return programDescription;
-    }
-
-    public void setProgramDescription(String programDescription) {
-        this.programDescription = programDescription;
-    }
 
 }

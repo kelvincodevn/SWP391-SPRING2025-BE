@@ -46,4 +46,14 @@ public class ProgramAPI {
         List<ProgramViewDTO> programs = programService.getAllPrograms();
         return ResponseEntity.ok(programs);
     }
+
+    @GetMapping("User/{programId}")
+    public ResponseEntity<?> getProgramDetailsForUser(@PathVariable Long programId) {
+        return programService.getProgramDetails(programId);
+    }
+
+    @GetMapping("Manager/{programId}")
+    public ResponseEntity<?> getProgramDetailsForManager(@PathVariable Long programId) {
+        return programService.getProgramDetails(programId);
+    }
 }

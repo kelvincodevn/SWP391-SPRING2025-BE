@@ -4,16 +4,27 @@ public class ProgramDTO {
     private String programName;
     private String programCategory;
     private String programDescription;
-    private boolean isDeleted;
+
+    private String programLink;
+
 
     // Constructors
     public ProgramDTO() {}
 
-    public ProgramDTO(String programName, String programCategory, String programDescription, boolean isDeleted) {
+    public ProgramDTO(String programName, String programCategory, String programDescription, String programLink) {
         this.programName = programName;
         this.programCategory = programCategory;
         this.programDescription = programDescription;
-        this.isDeleted = isDeleted;
+        this.programLink = programLink;
+
+    }
+
+    public String getProgramLink() {
+        return programLink;
+    }
+
+    public void setProgramLink(String programLink) {
+        this.programLink = programLink;
     }
 
     // Getters and Setters
@@ -41,11 +52,5 @@ public class ProgramDTO {
         this.programDescription = programDescription;
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
-    }
 
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
 }

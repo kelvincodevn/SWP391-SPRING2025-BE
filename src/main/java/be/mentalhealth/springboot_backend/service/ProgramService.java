@@ -1,10 +1,12 @@
 package be.mentalhealth.springboot_backend.service;
 
 import be.mentalhealth.springboot_backend.DTO.ProgramDTO;
+import be.mentalhealth.springboot_backend.DTO.ProgramDetailDTO;
 import be.mentalhealth.springboot_backend.DTO.ProgramViewDTO;
 import be.mentalhealth.springboot_backend.Repository.ProgramRepository;
 import be.mentalhealth.springboot_backend.entity.Program;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,9 +23,28 @@ public class ProgramService {
         List<Program> programs = programRepository.findByIsDeletedFalse();
 
         return programs.stream()
-                .map(p -> new ProgramViewDTO(p.getProgramName(), p.getProgramCategory(), p.getProgramDescription()))
+                .map(p -> new ProgramViewDTO(p.getProgramId() ,p.getProgramName(), p.getProgramCategory()))
                 .collect(Collectors.toList());
     }
+
+    public ResponseEntity<?> getProgramDetails(Long programId) {
+        Optional<Program> programOptional = programRepository.findById(programId);
+
+        if (programOptional.isEmpty() || programOptional.get().isDeleted()) {
+            return ResponseEntity.badRequest().body("Program not found or has been deleted.");
+        }
+
+        Program program = programOptional.get();
+        ProgramDetailDTO programDetail = new ProgramDetailDTO(
+                program.getProgramName(),
+                program.getProgramCategory(),
+                program.getProgramDescription(),
+                program.getProgramLink()
+        );
+
+        return ResponseEntity.ok(programDetail);
+    }
+
 
 
     public Program createProgram(ProgramDTO programDTO) {
@@ -32,7 +53,8 @@ public class ProgramService {
             program.setProgramName(programDTO.getProgramName());
             program.setProgramCategory(programDTO.getProgramCategory());
             program.setProgramDescription(programDTO.getProgramDescription());
-            program.setDeleted(programDTO.isDeleted());
+            program.setProgramLink(programDTO.getProgramLink());
+            program.setDeleted(false);
 
             return programRepository.save(program);
         } catch (Exception e) {
@@ -46,7 +68,7 @@ public class ProgramService {
 
     public Program deleteProgram(long id) {
         Program program = programRepository.findProgramByprogramID(id);
-        program.isDeleted = true;
+        program.setDeleted(true);
         return programRepository.save(program);
     }
 
@@ -57,6 +79,7 @@ public class ProgramService {
             newProgram.setProgramName(program.getProgramName());
             newProgram.setProgramDescription(program.getProgramDescription());
             newProgram.setProgramCategory(program.getProgramCategory());
+            newProgram.setProgramLink(program.getProgramLink());
             return programRepository.save(newProgram);
         } else {
             throw new RuntimeException("User not found with id: " + id);
