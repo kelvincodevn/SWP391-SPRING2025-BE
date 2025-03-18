@@ -71,45 +71,45 @@ public class PsychologistService {
 //        return clients;
 //    }
 
-    public Map<String, Object> getPsychologistStats(Long psychologistId) {
-        User psychologist = userRepository.findById(psychologistId)
-                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST)
-                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+//    public Map<String, Object> getPsychologistStats(Long psychologistId) {
+//        User psychologist = userRepository.findById(psychologistId)
+//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST)
+//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+//
+//        long totalSlots = psychologistSlotRepository.countByPsychologistUserID(psychologistId);
+//        long totalBookings = bookingRepository.countByPsychologistId(psychologistId);
+//        long completedBookings = bookingRepository.countByPsychologistIdAndStatus(psychologistId, BookingStatus.COMPLETED);
+//
+//        Map<String, Object> stats = new HashMap<>();
+//        stats.put("totalSlots", totalSlots);
+//        stats.put("totalBookings", totalBookings);
+//        stats.put("completedBookings", completedBookings);
+//
+//        return stats;
+//    }
 
-        long totalSlots = psychologistSlotRepository.countByPsychologistUserID(psychologistId);
-        long totalBookings = bookingRepository.countByPsychologistId(psychologistId);
-        long completedBookings = bookingRepository.countByPsychologistIdAndStatus(psychologistId, BookingStatus.COMPLETED);
-
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalSlots", totalSlots);
-        stats.put("totalBookings", totalBookings);
-        stats.put("completedBookings", completedBookings);
-
-        return stats;
-    }
-
-    public List<Map<String, Object>> getPsychologistClients(Long psychologistId) {
-        User psychologist = userRepository.findById(psychologistId)
-                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST)
-                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-
-        // Lấy danh sách booking của psychologist
-        List<Booking> bookings = bookingRepository.findByPsychologistIdAndStatusNot(psychologistId, BookingStatus.CANCELLED);
-
-        // Chuyển đổi thông tin client từ booking
-        List<Map<String, Object>> clients = new ArrayList<>();
-        for (Booking booking : bookings) {
-            Map<String, Object> client = new HashMap<>();
-            client.put("id", booking.getUser().getUserID());
-            client.put("fullName", booking.getUser().getFullName());
-            client.put("email", booking.getUser().getEmail());
-            client.put("bookingId", booking.getId());
-            client.put("bookingDate", booking.getSlot().getAvailableDate());
-            clients.add(client);
-        }
-
-        return clients;
-    }
+//    public List<Map<String, Object>> getPsychologistClients(Long psychologistId) {
+//        User psychologist = userRepository.findById(psychologistId)
+//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST)
+//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+//
+//        // Lấy danh sách booking của psychologist
+//        List<Booking> bookings = bookingRepository.findByPsychologistIdAndStatusNot(psychologistId, BookingStatus.CANCELLED);
+//
+//        // Chuyển đổi thông tin client từ booking
+//        List<Map<String, Object>> clients = new ArrayList<>();
+//        for (Booking booking : bookings) {
+//            Map<String, Object> client = new HashMap<>();
+//            client.put("id", booking.getUser().getUserID());
+//            client.put("fullName", booking.getUser().getFullName());
+//            client.put("email", booking.getUser().getEmail());
+//            client.put("bookingId", booking.getId());
+//            client.put("bookingDate", booking.getSlot().getAvailableDate());
+//            clients.add(client);
+//        }
+//
+//        return clients;
+//    }
 
 //    public Map<String, Object> getPsychologistProfile(Long psychologistId) {
 //        User psychologist = userRepository.findById(psychologistId)
@@ -158,5 +158,9 @@ public class PsychologistService {
 //        updatedProfile.put("createdAt", psychologist.getCreatedAt());
 //
 //        return updatedProfile;
+//    }
+
+//    public List<Booking> findBookingsByPsychologistUserId(Long userId) {
+//        return bookingRepository.findByPsychologistSlot_Psychologist_UserID(userId);
 //    }
 }

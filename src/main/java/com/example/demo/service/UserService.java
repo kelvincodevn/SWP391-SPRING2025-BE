@@ -53,19 +53,19 @@ public class UserService {
         return modelMapper.map(savedUser, UserProfileDTO.class);
     }
 
-    public Map<String, Object> getUserStats(Long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
-        long totalBookings = bookingRepository.countByUserUserID(userId);
-        long completedBookings = bookingRepository.countByUserIdAndStatus(userId, BookingStatus.COMPLETED);
-        long cancelledBookings = bookingRepository.countByUserIdAndStatus(userId, BookingStatus.CANCELLED);
-
-        Map<String, Object> stats = new HashMap<>();
-        stats.put("totalBookings", totalBookings);
-        stats.put("completedBookings", completedBookings);
-        stats.put("cancelledBookings", cancelledBookings);
-
-        return stats;
-    }
+//    public Map<String, Object> getUserStats(Long userId) {
+//        User user = userRepository.findById(userId)
+//                .orElseThrow(() -> new RuntimeException("User not found"));
+//
+//        long totalBookings = bookingRepository.countByUserUserID(userId);
+//        long completedBookings = bookingRepository.countByUserIdAndStatus(userId, BookingStatus.COMPLETED);
+//        long cancelledBookings = bookingRepository.countByUserIdAndStatus(userId, BookingStatus.CANCELLED);
+//
+//        Map<String, Object> stats = new HashMap<>();
+//        stats.put("totalBookings", totalBookings);
+//        stats.put("completedBookings", completedBookings);
+//        stats.put("cancelledBookings", cancelledBookings);
+//
+//        return stats;
+//    }
 }

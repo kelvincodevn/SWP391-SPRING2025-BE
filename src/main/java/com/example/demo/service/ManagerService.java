@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.DTO.PsychologistDetailsDTO;
 import com.example.demo.Repository.UserDetailRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.entity.User;
@@ -92,5 +93,36 @@ public class ManagerService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         user.isDeleted = true;
         return userRepository.save(user);
+    }
+
+    // Thêm phương thức mới để lấy chi tiết psychologist
+    public PsychologistDetailsDTO getPsychologistDetails(Long userId) {
+        User user = userRepository.findById(userId)
+                .filter(u -> !u.isDeleted)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!user.getRoleEnum().equals(RoleEnum.PSYCHOLOGIST)) {
+            throw new RuntimeException("User is not a Psychologist");
+        }
+
+        UserDetail userDetail = userDetailRepository.findByUser(user)
+                .orElseThrow(() -> new RuntimeException("UserDetail not found for this psychologist"));
+
+        return new PsychologistDetailsDTO(
+                user.getUserID(),
+                user.getUsername(),
+                user.getFullName(),
+                user.getEmail(),
+                user.getDob(),
+                user.getPhone(),
+                user.getCreatedDate(),
+                user.getStatus(),
+                user.getGender(),
+                user.getAvatar(),
+                userDetail.getMajor(),
+                userDetail.getDegree(),
+                userDetail.getWorkplace(),
+                userDetail.getFee() // Thêm fee vào DTO
+        );
     }
 }

@@ -1,5 +1,6 @@
 package com.example.demo.api.Manager;
 
+import com.example.demo.DTO.PsychologistDetailsDTO;
 import com.example.demo.entity.User;
 import com.example.demo.entity.request.AccountRequest;
 import com.example.demo.service.ManagerService;
@@ -40,5 +41,11 @@ public class ManagerAPI {
     @DeleteMapping("/{id}")
     public ResponseEntity<User> deleteUser(@PathVariable Long id) {
         return ResponseEntity.ok(managerService.deleteUser(id));
+    }
+
+    // Thêm endpoint mới để xem chi tiết psychologist
+    @GetMapping("/{id}/details")
+    public ResponseEntity<PsychologistDetailsDTO> getPsychologistDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(managerService.getPsychologistDetails(id));
     }
 }

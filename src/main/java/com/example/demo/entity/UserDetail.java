@@ -22,6 +22,7 @@ public class UserDetail {
     private String major;
     private String workplace;
     private String degree;
+    private Double fee; // Thêm field fee để lưu phí dịch vụ
 
     @PrePersist
     @PreUpdate
@@ -34,12 +35,13 @@ public class UserDetail {
     public UserDetail() {
     }
 
-    public UserDetail(Integer userDetailId, User user, String major, String workplace, String degree) {
+    public UserDetail(Integer userDetailId, User user, String major, String workplace, String degree, Double fee) {
         this.userDetailId = userDetailId;
         this.user = user;
         this.major = major;
         this.workplace = workplace;
         this.degree = degree;
+        this.fee = fee;
     }
 
     public Integer getUserDetailId() {
@@ -80,5 +82,13 @@ public class UserDetail {
 
     public void setDegree(String degree) {
         this.degree = degree;
+    }
+
+    public Double getFee() {
+        return fee;
+    }
+
+    public void setFee(Double fee) {
+        this.fee = fee;
     }
 }

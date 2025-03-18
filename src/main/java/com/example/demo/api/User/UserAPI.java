@@ -44,10 +44,10 @@ public class UserAPI {
         }
     }
 
-    @GetMapping("/{userId}/stats")
-    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
-    public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable Long userId) {
-        Map<String, Object> stats = userService.getUserStats(userId);
-        return ResponseEntity.ok(stats);
-    }
+//    @GetMapping("/{userId}/stats")
+//    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
+//    public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable Long userId) {
+//        Map<String, Object> stats = userService.getUserStats(userId);
+//        return ResponseEntity.ok(stats);
+//    }
 }
