@@ -24,11 +24,11 @@ public class PsychologistSlot {
         this.psychologistSlotId = psychologistSlotId;
     }
 
-    public Psychologist getPsychologist() {
+    public User getPsychologist() {
         return psychologist;
     }
 
-    public void setPsychologist(Psychologist psychologist) {
+    public void setPsychologist(User psychologist) {
         this.psychologist = psychologist;
     }
 
@@ -49,11 +49,11 @@ public class PsychologistSlot {
     }
 
     @ManyToOne
-    @JoinColumn(name = "psycholId", nullable = false)
-    private Psychologist psychologist;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User psychologist; // Thay Psychologist bằng User
 
     @ManyToOne
-    @JoinColumn(name = "slotId", nullable = false)
+    @JoinColumn(name = "slot_id", nullable = false)
     private Slot slot;
 
     @Enumerated(EnumType.STRING)
@@ -62,7 +62,7 @@ public class PsychologistSlot {
     public PsychologistSlot() {
     }
 
-    public PsychologistSlot(Integer psychologistSlotId, Psychologist psychologist, Slot slot, AvailabilityStatus availabilityStatus) {
+    public PsychologistSlot(Integer psychologistSlotId, User psychologist, Slot slot, AvailabilityStatus availabilityStatus) {
         this.psychologistSlotId = psychologistSlotId;
         this.psychologist = psychologist;
         this.slot = slot;
@@ -75,7 +75,7 @@ public class PsychologistSlot {
 
     public static class PsychologistSlotBuilder {
         private Integer psychologistSlotId;
-        private Psychologist psychologist;
+        private User psychologist;
         private Slot slot;
         private AvailabilityStatus availabilityStatus;
 
@@ -84,7 +84,7 @@ public class PsychologistSlot {
             return this;
         }
 
-        public PsychologistSlotBuilder psychologist(Psychologist psychologist) {
+        public PsychologistSlotBuilder psychologist(User psychologist) {
             this.psychologist = psychologist;
             return this;
         }

@@ -2,6 +2,7 @@ package com.example.demo.DTO;
 
 import jakarta.persistence.Column;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 public class UserProfileDTO {
@@ -15,7 +16,7 @@ public class UserProfileDTO {
     private String email;
 
 
-    private LocalDateTime dob;
+    private LocalDate dob;
 
     private String phone;
 
@@ -33,7 +34,7 @@ public class UserProfileDTO {
     public UserProfileDTO() {
     }
 
-    public UserProfileDTO(String fullName, String email, LocalDateTime dob, String phone, LocalDateTime createdDate, String gender, String avatar) {
+    public UserProfileDTO(String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, String gender, String avatar) {
         this.fullName = fullName;
         this.email = email;
         this.dob = dob;
@@ -62,11 +63,11 @@ public class UserProfileDTO {
         this.email = email;
     }
 
-    public LocalDateTime getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(LocalDateTime dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 

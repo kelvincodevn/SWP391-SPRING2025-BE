@@ -21,8 +21,8 @@ import org.springframework.web.cors.CorsUtils;
 @Configuration
 public class SecurityConfig {
 
-    @Autowired
-    AuthenticationService authenticationService;
+//    @Autowired
+//    AuthenticationService authenticationService;
 
     @Autowired
     Filter filter;
@@ -65,6 +65,9 @@ public class SecurityConfig {
                     .requestMatchers("/api/manager/**").hasAuthority("MANAGER")
                     .requestMatchers("/api/student/**").hasAuthority("STUDENT")
                     .requestMatchers("/api/parent/**").hasAuthority("PARENT")
+                    .requestMatchers("/api/bookings/create").hasAnyAuthority("STUDENT", "PARENT")
+                    .requestMatchers("/api/bookings/{bookingId}/confirm").hasAnyAuthority("STUDENT", "PARENT")
+                    .requestMatchers("/api/bookings/{bookingId}/cancel").hasAnyAuthority("STUDENT", "PARENT")
                     .requestMatchers("/api/psychologist/**").hasAuthority("PSYCHOLOGIST")
                     .requestMatchers("/api/user/**").permitAll() // Các API chung
                     .requestMatchers("/**").permitAll() // Các API chung
@@ -72,7 +75,7 @@ public class SecurityConfig {
                     .requestMatchers(CorsUtils::isPreFlightRequest).permitAll()
                     .anyRequest().authenticated()
             )
-            .userDetailsService(authenticationService)
+//            .userDetailsService(authenticationService)
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .addFilterBefore(filter, UsernamePasswordAuthenticationFilter.class)
             .build();

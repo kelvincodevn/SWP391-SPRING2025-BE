@@ -10,6 +10,19 @@ import java.util.List;
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByStatus(BookingStatus status);
+
+    List<Booking> findBySlotSlotId(Integer slotId);
+
+    List<Booking> findByUser_UserID(Long userID);
+
+    List<Booking> findByPsychologistSlot_Psychologist_UserID(Long psychologistId);
+
+    long countByUserUserID(Long userId); // Đổi từ countByUserId thành countByUserUserID
+    long countByUserIdAndStatus(Long userId, BookingStatus status);
+
+    long countByPsychologistId(Long psychologistId);
+    long countByPsychologistIdAndStatus(Long psychologistId, BookingStatus status);
+    List<Booking> findByPsychologistIdAndStatusNot(Long psychologistId, BookingStatus status);
 }
 
 

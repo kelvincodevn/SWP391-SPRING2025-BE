@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
-@RequestMapping("/api/user")
+@RequestMapping("/api/users")
 @SecurityRequirement(name = "api")
 public class UserAPI {
     @Autowired
@@ -40,5 +42,12 @@ public class UserAPI {
             // Log lỗi
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
+    }
+
+    @GetMapping("/{userId}/stats")
+    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
+    public ResponseEntity<Map<String, Object>> getUserStats(@PathVariable Long userId) {
+        Map<String, Object> stats = userService.getUserStats(userId);
+        return ResponseEntity.ok(stats);
     }
 }

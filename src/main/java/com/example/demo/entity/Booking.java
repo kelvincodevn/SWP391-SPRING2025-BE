@@ -18,6 +18,10 @@ public class Booking {
     private int id;
 
     @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
+
+    @ManyToOne
     @JoinColumn(name = "slot_id", nullable = false)
     private Slot slot;
 
