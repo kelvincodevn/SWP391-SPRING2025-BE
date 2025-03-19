@@ -1,19 +1,15 @@
 package com.example.demo.service;
 
 import com.example.demo.Repository.BookingRepository;
-import com.example.demo.Repository.PsychologistSlotRepository;
+import com.example.demo.Repository.TestResultRepository;
 import com.example.demo.Repository.UserRepository;
-import com.example.demo.entity.Booking;
+import com.example.demo.entity.TestResult;
 import com.example.demo.entity.User;
-import com.example.demo.enums.BookingStatus;
 import com.example.demo.enums.RoleEnum;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class PsychologistService {
@@ -21,11 +17,14 @@ public class PsychologistService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PsychologistSlotRepository psychologistSlotRepository;
+//    @Autowired
+//    private PsychologistSlotRepository psychologistSlotRepository;
 
     @Autowired
     private BookingRepository bookingRepository;
+
+    @Autowired
+    TestResultRepository testResultRepository;
 
     public List<User> getAllPsychologists() {
         return userRepository.findByRoleEnumAndIsDeletedFalse(RoleEnum.PSYCHOLOGIST);
@@ -163,4 +162,15 @@ public class PsychologistService {
 //    public List<Booking> findBookingsByPsychologistUserId(Long userId) {
 //        return bookingRepository.findByPsychologistSlot_Psychologist_UserID(userId);
 //    }
+
+    // Lấy danh sách bài test mà khách hàng đã làm
+    public List<TestResult> getTestResultsByUserId(Long userId) {
+        return testResultRepository.findByUser_UserID(userId);
+    }
+
+    // Lấy chi tiết kết quả bài test
+    public TestResult getTestResultById(Long resultId) {
+        return testResultRepository.findById(resultId)
+                .orElseThrow(() -> new RuntimeException("Test result not found"));
+    }
 }

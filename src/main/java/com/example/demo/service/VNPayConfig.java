@@ -8,6 +8,7 @@ import javax.crypto.spec.SecretKeySpec;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 @Configuration
@@ -15,7 +16,7 @@ public class VNPayConfig {
     public static final String VNPAY_TMN_CODE = "83U5OKQ7"; // Thay bằng mã TMN từ VNPay Sandbox
     public static final String VNPAY_HASH_SECRET = "TSAYTO26IOINY16YDY8V5CQPS08LXCZU"; // Thay bằng secret từ VNPay Sandbox
     public static final String VNPAY_URL = "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-    public static final String VNPAY_RETURN_URL = "http://localhost:8082/api/payment/vnpay/callback";
+    public static final String VNPAY_RETURN_URL = "http://localhost:5173/payment-callback";
     public static final String vnp_Version = "2.1.0";
     public static final String vnp_Command = "pay";
     public static final String orderType = "250000";
@@ -29,9 +30,14 @@ public class VNPayConfig {
         return ipAddress;
     }
 
-    // Phương thức để lấy thời gian hiện tại dưới dạng chuỗi
+//    // Phương thức để lấy thời gian hiện tại dưới dạng chuỗi
+//    public static String getCurrentDateTime() {
+//        return String.valueOf(System.currentTimeMillis());
+//    }
+
     public static String getCurrentDateTime() {
-        return String.valueOf(System.currentTimeMillis());
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+        return sdf.format(new Date());
     }
 
     // Phương thức để tạo query string từ Map
@@ -76,6 +82,20 @@ public class VNPayConfig {
         sb.setLength(sb.length() - 1); // Xóa "&" cuối
         return HmacSHA512(sb.toString(), VNPayConfig.VNPAY_HASH_SECRET);
     }
+
+//    public static String hashAllFields(Map<String, String> fields) {
+//        List<String> fieldNames = new ArrayList<>(fields.keySet());
+//        Collections.sort(fieldNames);
+//        StringBuilder sb = new StringBuilder();
+//        for (String fieldName : fieldNames) {
+//            String fieldValue = fields.get(fieldName);
+//            if (fieldValue != null && !fieldValue.isEmpty() && !fieldName.equals("vnp_SecureHash")) {
+//                sb.append(fieldName).append("=").append(fieldValue).append("&"); // Không encode ở đây
+//            }
+//        }
+//        sb.setLength(sb.length() - 1); // Xóa "&" cuối
+//        return HmacSHA512(sb.toString(), VNPayConfig.VNPAY_HASH_SECRET);
+//    }
 
     private static String HmacSHA512(String data, String key) {
         try {

@@ -64,7 +64,7 @@ public class AuthenticationService implements UserDetailsService {
     public User register(AccountRequest accountRequest) {
         User user = new User();
         user.setUsername(accountRequest.getUsername());
-        user.setRoleEnum(accountRequest.getRoleEnum()); // Lấy vai trò từ request
+        user.setRoleEnum(accountRequest.getRoleEnum() != null ? accountRequest.getRoleEnum() : RoleEnum.STUDENT);
         user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
         user.setFullName(accountRequest.getFullName());
         user.setEmail(accountRequest.getEmail());

@@ -1,6 +1,8 @@
 package com.example.demo.Repository;
 
 import com.example.demo.entity.Booking;
+import com.example.demo.entity.Slot;
+import com.example.demo.entity.User;
 import com.example.demo.enums.BookingStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -10,11 +12,18 @@ import java.util.List;
 
 @Repository
 public interface BookingRepository extends JpaRepository<Booking, Integer> {
+//    List<Booking> findByStatus(BookingStatus status);
+//
+//    List<Booking> findBySlotSlotId(Integer slotId);
+
     List<Booking> findByStatus(BookingStatus status);
 
     List<Booking> findBySlotSlotId(Integer slotId);
 
-//    List<Booking> findByUser_UserID(Long userID);
+    List<Booking> findByUser(User user);
+    List<Booking> findBySlotIn(List<Slot> slots);
+
+    List<Booking> findByUser_UserID(Long userID);
 
 //    List<Booking> findByPsychologistSlot_Psychologist_UserID(Long psychologistId);
 

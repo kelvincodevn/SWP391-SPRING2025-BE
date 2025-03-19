@@ -6,13 +6,17 @@ import com.example.demo.enums.BookingStatus;
 import com.example.demo.service.PaymentService;
 import com.example.demo.service.VNPayConfig;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import jakarta.annotation.security.PermitAll;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,8 +46,8 @@ public class PaymentAPI {
     public ResponseEntity<String> createPaymentUrl(@RequestParam Integer bookingId, HttpServletRequest request) throws UnsupportedEncodingException {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-        if (booking.getStatus() != BookingStatus.PENDING) {
-            throw new RuntimeException("Booking must be in PENDING status");
+        if (booking.getStatus() != BookingStatus.CONFIRMED) {
+            throw new RuntimeException("Booking must be in CONFIRMED status");
         }
 
         String vnp_TxnRef = bookingId + "_" + System.currentTimeMillis();
@@ -64,18 +68,27 @@ public class PaymentAPI {
         vnp_Params.put("vnp_IpAddr", vnp_IpAddr);
         vnp_Params.put("vnp_CreateDate", VNPayConfig.getCurrentDateTime());
 
+//        String queryString = VNPayConfig.createQueryString(vnp_Params);
+//        String secureHash = VNPayConfig.hmacSHA512(VNPayConfig.VNPAY_HASH_SECRET, queryString);
+//        String paymentUrl = VNPayConfig.VNPAY_URL + "?" + queryString + "&vnp_SecureHash=" + secureHash;
+
+        // Tính secure hash dựa trên hashAllFields
+        String secureHash = VNPayConfig.hashAllFields(vnp_Params);
+        vnp_Params.put("vnp_SecureHash", secureHash);
+
         String queryString = VNPayConfig.createQueryString(vnp_Params);
-        String secureHash = VNPayConfig.hmacSHA512(VNPayConfig.VNPAY_HASH_SECRET, queryString);
-        String paymentUrl = VNPayConfig.VNPAY_URL + "?" + queryString + "&vnp_SecureHash=" + secureHash;
+        String paymentUrl = VNPayConfig.VNPAY_URL + "?" + queryString;
 
         return ResponseEntity.ok(paymentUrl);
     }
 
-    @GetMapping("/callback")
-    public ResponseEntity<String> paymentCallback(@RequestParam Map<String, String> params) {
-        paymentService.handlePaymentCallback(params);
-        return ResponseEntity.ok("Payment processed successfully");
-    }
+//    @GetMapping("/callback")
+//    public ResponseEntity<String> paymentCallback(@RequestParam Map<String, String> params) {
+//        paymentService.handlePaymentCallback(params);
+//        return ResponseEntity.ok("Payment processed successfully");
+//    }
+
+
 
     @GetMapping("/success")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
@@ -91,7 +104,7 @@ public class PaymentAPI {
         response.put("amount", booking.getFee());
         response.put("date", booking.getSlot().getAvailableDate().toString());
         response.put("time", booking.getSlot().getStartTime() + " - " + booking.getSlot().getEndTime());
-        response.put("psychologistName", booking.getSlot().getPsychologistSlot().getPsychologist().getFullName());
+        response.put("psychologistName", booking.getSlot().getUser().getFullName()); // Thay getPsychologistSlot()
 
         return ResponseEntity.ok(response);
     }

@@ -81,6 +81,15 @@ public class User implements UserDetails {
 
     // Getters and Setters
 
+    // Thêm getter và setter cho userDetail
+    public UserDetail getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+    }
+
     public Long getUserID() {
         return userID;
     }

@@ -6,7 +6,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "user_detail")
+@Table(name = "user_details")
 @Builder
 
 public class UserDetail {
@@ -91,4 +91,6 @@ public class UserDetail {
     public void setFee(Double fee) {
         this.fee = fee;
     }
+
+
 }

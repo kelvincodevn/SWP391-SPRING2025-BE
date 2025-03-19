@@ -1,8 +1,10 @@
 package com.example.demo.api.Psychologist;
 
 import com.example.demo.entity.Booking;
+import com.example.demo.entity.TestResult;
 import com.example.demo.entity.User;
 import com.example.demo.service.PsychologistService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -13,6 +15,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/psychologists")
+@SecurityRequirement(name = "api")
 public class PsychologistAPI {
 
     @Autowired
@@ -64,4 +67,18 @@ public class PsychologistAPI {
 //    public long getBookingCount(@RequestParam Long userId) {
 //        return psychologistService.countBookingsByUser(userId);
 //    }
+
+    // Lấy danh sách bài test của khách hàng
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<List<TestResult>> getTestResultsByUserId(@PathVariable Long userId) {
+        List<TestResult> results = psychologistService.getTestResultsByUserId(userId);
+        return ResponseEntity.ok(results);
+    }
+
+    // Lấy chi tiết kết quả bài test
+    @GetMapping("/test-results/{resultId}")
+    public ResponseEntity<TestResult> getTestResultById(@PathVariable Long resultId) {
+        TestResult result = psychologistService.getTestResultById(resultId);
+        return ResponseEntity.ok(result);
+    }
 }

@@ -68,6 +68,7 @@ public class SecurityConfig {
                     .requestMatchers("/api/bookings/create").hasAnyAuthority("STUDENT", "PARENT")
                     .requestMatchers("/api/bookings/{bookingId}/confirm").hasAnyAuthority("STUDENT", "PARENT")
                     .requestMatchers("/api/bookings/{bookingId}/cancel").hasAnyAuthority("STUDENT", "PARENT")
+                    .requestMatchers("/api/slots/available").hasAnyAuthority("STUDENT", "PARENT")
                     .requestMatchers("/api/psychologist/**").hasAuthority("PSYCHOLOGIST")
                     .requestMatchers("/api/user/**").permitAll() // Các API chung
                     .requestMatchers("/**").permitAll() // Các API chung

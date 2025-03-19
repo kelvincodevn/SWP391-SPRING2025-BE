@@ -3,11 +3,9 @@ package com.example.demo.service;
 import com.example.demo.DTO.BookingRequest;
 import com.example.demo.DTO.BookingResponse;
 import com.example.demo.Repository.BookingRepository;
-import com.example.demo.Repository.PsychologistSlotRepository;
 import com.example.demo.Repository.SlotRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.entity.Booking;
-import com.example.demo.entity.PsychologistSlot;
 import com.example.demo.entity.Slot;
 import com.example.demo.entity.User;
 import com.example.demo.enums.AvailabilityStatus;
@@ -16,29 +14,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.format.DateTimeFormatter;
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Service
-
 public class BookingService {
-//    public BookingService(BookingRepository bookingRepository, EmailBookingService emailBookingService, SlotRepository slotRepository, PsychologistSlotRepository psychologistSlotRepository) {
-//        this.bookingRepository = bookingRepository;
-//        this.emailBookingService = emailBookingService;
-//        this.slotRepository = slotRepository;
-//        this.psychologistSlotRepository = psychologistSlotRepository;
-//    }
-//
-//    private final BookingRepository bookingRepository;
-//    private final EmailBookingService emailBookingService;
-//    private final SlotRepository slotRepository;
-//    private final PsychologistSlotRepository psychologistSlotRepository;
-
     @Autowired
     BookingRepository bookingRepository;
 
     @Autowired
     SlotRepository slotRepository;
-
-    @Autowired
-    PsychologistSlotRepository psychologistSlotRepository;
 
     @Autowired
     UserRepository userRepository;
@@ -51,32 +37,36 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
         Slot slot = slotRepository.findById(request.getSlotId())
                 .orElseThrow(() -> new RuntimeException("Slot not found"));
-        PsychologistSlot psychologistSlot = psychologistSlotRepository.findBySlot(slot)
-                .orElseThrow(() -> new RuntimeException("PsychologistSlot not found"));
 
-        if (!slot.isAvailable() || psychologistSlot.getAvailabilityStatus() != AvailabilityStatus.AVAILABLE) {
+        if (slot.getAvailabilityStatus() != AvailabilityStatus.AVAILABLE) {
             throw new RuntimeException("Slot is not available");
         }
 
+        // Tạo booking
         Booking booking = new Booking();
+        booking.setUser(customer);
         booking.setSlot(slot);
-        booking.setFullName(customer.getFullName());
-        booking.setGender(customer.getGender());
-        booking.setEmail(customer.getEmail());
+        booking.setFullName(request.getFullName() != null ? request.getFullName() : customer.getFullName());
+        booking.setGender(request.getGender() != null ? request.getGender() : customer.getGender());
+        booking.setEmail(request.getEmail() != null ? request.getEmail() : customer.getEmail());
         booking.setPhoneNumber(request.getPhoneNumber());
-        booking.setDob(customer.getDob());
+        booking.setDob(request.getDob() != null ? request.getDob() : customer.getDob());
         booking.setReason(request.getReason());
-        booking.setFee(50000.0); // Giả định phí mặc định, có thể lấy từ Psychologist
+        // Lấy fee từ UserDetail của psychologist
+        Double fee = slot.getUser().getUserDetail().getFee();
+        booking.setFee(fee != null ? fee : 70000.0);
         booking.setStatus(BookingStatus.PENDING);
-        bookingRepository.save(booking);
 
-        slot.setAvailable(false);
-        psychologistSlot.setAvailabilityStatus(AvailabilityStatus.BOOKED);
+        // Lưu booking
+        booking = bookingRepository.save(booking);
+
+        // Cập nhật trạng thái Slot
+        slot.setAvailabilityStatus(AvailabilityStatus.BOOKED);
         slotRepository.save(slot);
-        psychologistSlotRepository.save(psychologistSlot);
 
+        // Gửi email thông báo
         emailBookingService.sendEmail(
-                psychologistSlot.getPsychologist().getEmail(),
+                slot.getUser().getEmail(),
                 "New Booking Request",
                 "A customer has booked your slot on " + slot.getAvailableDate() + " from " + slot.getStartTime() + " to " + slot.getEndTime()
         );
@@ -92,7 +82,7 @@ public class BookingService {
         booking.setStatus(BookingStatus.ACCEPTED);
         bookingRepository.save(booking);
 
-        String confirmLink = "http://localhost:8082/api/psychologist/bookings/" + bookingId + "/confirm";
+        String confirmLink = "http://localhost:8082/api/bookings/" + bookingId + "/confirm";
         emailBookingService.sendEmail(
                 booking.getEmail(),
                 "Booking Accepted",
@@ -106,13 +96,11 @@ public class BookingService {
             throw new RuntimeException("Can only decline PENDING bookings");
         }
         booking.setStatus(BookingStatus.DECLINED);
-        PsychologistSlot slot = psychologistSlotRepository.findBySlot(booking.getSlot())
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-        slot.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
-        slot.getSlot().setAvailable(true);
-        bookingRepository.save(booking);
-        psychologistSlotRepository.save(slot);
-        slotRepository.save(slot.getSlot());
+        Slot slot = booking.getSlot();
+        if (slot != null) {
+            slot.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+            slotRepository.save(slot);
+        }
 
         emailBookingService.sendEmail(
                 booking.getEmail(),
@@ -141,7 +129,7 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.PAID) {
             throw new RuntimeException("Can only complete PAID bookings");
         }
-        String filePath = saveFile(report); // Logic lưu file, ví dụ dùng FileSystem hoặc S3
+        String filePath = saveFile(report);
         booking.setStatus(BookingStatus.COMPLETED);
         booking.setMedicalReportPath(filePath);
         bookingRepository.save(booking);
@@ -155,23 +143,24 @@ public class BookingService {
     }
 
     private String saveFile(MultipartFile file) {
-        // Logic lưu file, trả về đường dẫn
-        return "path/to/" + file.getOriginalFilename();
+        return "path/to/" + file.getOriginalFilename(); // Logic lưu file cần được triển khai thực tế
     }
 
     public void cancelBooking(Long userId, Integer bookingId) {
         Booking booking = getBookingOrThrow(bookingId);
+        if (!booking.getUser().getUserID().equals(userId)) {
+            throw new RuntimeException("Unauthorized to cancel this booking");
+        }
         if (booking.getStatus() == BookingStatus.PAID || booking.getStatus() == BookingStatus.COMPLETED) {
             throw new RuntimeException("Cannot cancel a paid or completed booking");
         }
-        PsychologistSlot slot = psychologistSlotRepository.findBySlot(booking.getSlot())
-                .orElseThrow(() -> new RuntimeException("Slot not found"));
-        booking.setStatus(BookingStatus.CANCELLED);
-        slot.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
-        slot.getSlot().setAvailable(true);
-        bookingRepository.save(booking);
-        psychologistSlotRepository.save(slot);
-        slotRepository.save(slot.getSlot());
+        Slot slot = booking.getSlot();
+        if (slot != null) {
+            booking.setStatus(BookingStatus.CANCELLED);
+            slot.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+            bookingRepository.save(booking);
+            slotRepository.save(slot);
+        }
 
         emailBookingService.sendEmail(
                 booking.getEmail(),
@@ -179,10 +168,106 @@ public class BookingService {
                 "You have successfully cancelled your booking."
         );
         emailBookingService.sendEmail(
-                slot.getPsychologist().getEmail(),
+                slot.getUser().getEmail(),
                 "Booking Cancelled",
-                "The booking for your slot on " + slot.getSlot().getAvailableDate() + " has been cancelled."
+                "The booking for your slot on " + slot.getAvailableDate() + " has been cancelled."
         );
+    }
+
+    // Cập nhật phương thức getUserBookings
+    public List<BookingResponse> getUserBookings(Long userId) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+        List<Booking> bookings = bookingRepository.findByUser(user);
+
+        // Định dạng LocalDate thành String
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        return bookings.stream().map(booking -> {
+            Slot slot = booking.getSlot();
+            User psychologist = slot.getUser();
+            return new BookingResponse(
+                    booking.getId(),
+                    booking.getStatus().toString(),
+                    "Booking retrieved successfully",
+                    slot.getSlotId(),
+                    slot.getAvailableDate().format(dateFormatter), // Chuyển LocalDate thành String
+                    slot.getStartTime().toString(), // LocalTime tự động chuyển thành String
+                    slot.getEndTime().toString(),
+                    psychologist.getFullName(),
+                    booking.getFee()
+            );
+        }).collect(Collectors.toList());
+    }
+
+    // Thêm phương thức để lấy chi tiết booking
+    public BookingResponse getBookingDetails(Integer bookingId) {
+        Booking booking = getBookingOrThrow(bookingId);
+        Slot slot = booking.getSlot();
+        User psychologist = slot.getUser();
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        BookingResponse response = new BookingResponse(
+                booking.getId(),
+                booking.getStatus().toString(),
+                "Booking details retrieved successfully",
+                slot.getSlotId(),
+                slot.getAvailableDate().format(dateFormatter),
+                slot.getStartTime().toString(),
+                slot.getEndTime().toString(),
+                psychologist.getFullName(),
+                booking.getFee()
+        );
+
+        // Thêm thông tin chi tiết của psychologist
+        response.setPsychologistDetails(new BookingResponse.PsychologistDetails(
+                psychologist.getUserID(),
+                psychologist.getFullName(),
+                psychologist.getUserDetail().getMajor(),
+                psychologist.getUserDetail().getDegree(),
+                psychologist.getUserDetail().getWorkplace(),
+                psychologist.getUserDetail().getFee()
+        ));
+
+        return response;
+    }
+
+    // Thêm phương thức để lấy danh sách booking của psychologist
+    public List<BookingResponse> getPsychologistBookings(Long psychologistId) {
+        User psychologist = userRepository.findById(psychologistId)
+                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+
+        // Tìm tất cả slot của psychologist
+        List<Slot> slots = slotRepository.findByUser(psychologist);
+
+        // Tìm tất cả booking liên quan đến các slot này
+        List<Booking> bookings = bookingRepository.findBySlotIn(slots);
+
+        DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+
+        return bookings.stream().map(booking -> {
+            Slot slot = booking.getSlot();
+            User client = booking.getUser();
+            BookingResponse response = new BookingResponse(
+                    booking.getId(),
+                    booking.getStatus().toString(),
+                    "Booking retrieved successfully",
+                    slot.getSlotId(),
+                    slot.getAvailableDate().format(dateFormatter),
+                    slot.getStartTime().toString(),
+                    slot.getEndTime().toString(),
+                    slot.getUser().getFullName(),
+                    booking.getFee()
+            );
+            // Thêm thông tin client (người đặt lịch)
+            response.setClientDetails(new BookingResponse.ClientDetails(
+                    client.getUserID(),
+                    client.getFullName(),
+                    client.getEmail()
+            ));
+            return response;
+        }).collect(Collectors.toList());
     }
 
     private Booking getBookingOrThrow(Integer bookingId) {
@@ -190,4 +275,3 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
     }
 }
-

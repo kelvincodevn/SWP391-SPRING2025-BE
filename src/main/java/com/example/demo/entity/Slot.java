@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.AvailabilityStatus;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -13,26 +14,28 @@ public class Slot {
     private Integer slotId;
 
     @ManyToOne
-    @JoinColumn(name = "psychologist_slot_id")
-    private PsychologistSlot psychologistSlot;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // Liên kết trực tiếp với User (psychologist)
 
     private LocalDate availableDate;
     private LocalTime startTime;
     private LocalTime endTime;
-    private boolean available = true;
 
-    // Constructor mặc định (no-args)
+    @Enumerated(EnumType.STRING)
+    private AvailabilityStatus availabilityStatus; // Trạng thái khả dụng (AVAILABLE, BOOKED)
+
+    // Constructor mặc định
     public Slot() {
     }
 
     // Constructor đầy đủ tham số
-    public Slot(Integer slotId, PsychologistSlot psychologistSlot, LocalDate availableDate, LocalTime startTime, LocalTime endTime, boolean available) {
+    public Slot(Integer slotId, User user, LocalDate availableDate, LocalTime startTime, LocalTime endTime, AvailabilityStatus availabilityStatus) {
         this.slotId = slotId;
-        this.psychologistSlot = psychologistSlot;
+        this.user = user;
         this.availableDate = availableDate;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.available = available;
+        this.availabilityStatus = availabilityStatus;
     }
 
     // Phương thức tĩnh để trả về SlotBuilder
@@ -43,11 +46,11 @@ public class Slot {
     // Lớp SlotBuilder
     public static class SlotBuilder {
         private Integer slotId;
-        private PsychologistSlot psychologistSlot;
+        private User user;
         private LocalDate availableDate;
         private LocalTime startTime;
         private LocalTime endTime;
-        private boolean available = true;
+        private AvailabilityStatus availabilityStatus;
 
         public SlotBuilder() {
         }
@@ -57,8 +60,8 @@ public class Slot {
             return this;
         }
 
-        public SlotBuilder psychologistSlot(PsychologistSlot psychologistSlot) {
-            this.psychologistSlot = psychologistSlot;
+        public SlotBuilder user(User user) {
+            this.user = user;
             return this;
         }
 
@@ -77,17 +80,17 @@ public class Slot {
             return this;
         }
 
-        public SlotBuilder available(boolean available) {
-            this.available = available;
+        public SlotBuilder availabilityStatus(AvailabilityStatus availabilityStatus) {
+            this.availabilityStatus = availabilityStatus;
             return this;
         }
 
         public Slot build() {
-            return new Slot(slotId, psychologistSlot, availableDate, startTime, endTime, available);
+            return new Slot(slotId, user, availableDate, startTime, endTime, availabilityStatus);
         }
     }
 
-    // Getter và Setter thủ công
+    // Getter và Setter
     public Integer getSlotId() {
         return slotId;
     }
@@ -96,12 +99,12 @@ public class Slot {
         this.slotId = slotId;
     }
 
-    public PsychologistSlot getPsychologistSlot() {
-        return psychologistSlot;
+    public User getUser() {
+        return user;
     }
 
-    public void setPsychologistSlot(PsychologistSlot psychologistSlot) {
-        this.psychologistSlot = psychologistSlot;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDate getAvailableDate() {
@@ -128,11 +131,11 @@ public class Slot {
         this.endTime = endTime;
     }
 
-    public boolean isAvailable() {
-        return available;
+    public AvailabilityStatus getAvailabilityStatus() {
+        return availabilityStatus;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
+    public void setAvailabilityStatus(AvailabilityStatus availabilityStatus) {
+        this.availabilityStatus = availabilityStatus;
     }
 }
