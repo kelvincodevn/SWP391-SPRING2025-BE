@@ -29,11 +29,14 @@ import java.util.List;
 public class AuthenticationService implements UserDetailsService {
     @Autowired
     AuthenticationRepository authenticationRepository;
-    @Autowired
-    UserRepository userRepository;
 
-    @Autowired
-    PasswordEncoder passwordEncoder;
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     @Autowired
     AuthenticationManager authenticationManager;
@@ -61,7 +64,7 @@ public class AuthenticationService implements UserDetailsService {
     public User register(AccountRequest accountRequest) {
         User user = new User();
         user.setUsername(accountRequest.getUsername());
-        user.setRoleEnum(accountRequest.getRoleEnum()); // Lấy vai trò từ request
+        user.setRoleEnum(accountRequest.getRoleEnum() != null ? accountRequest.getRoleEnum() : RoleEnum.STUDENT);
         user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
         user.setFullName(accountRequest.getFullName());
         user.setEmail(accountRequest.getEmail());

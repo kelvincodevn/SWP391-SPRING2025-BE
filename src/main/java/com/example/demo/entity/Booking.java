@@ -1,6 +1,5 @@
 package com.example.demo.entity;
 
-
 import com.example.demo.enums.BookingStatus;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
@@ -18,6 +17,10 @@ public class Booking {
     private int id;
 
     @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    @OneToOne
     @JoinColumn(name = "slot_id", nullable = false)
     private Slot slot;
 
@@ -31,16 +34,18 @@ public class Booking {
     private Double fee;
 
     @Enumerated(EnumType.STRING)
-    private BookingStatus status; // "Pending", "Accepted", "Declined", "Confirmed", "Completed"
+    private BookingStatus status;
 
-    private String medicalReportPath; // Đường dẫn file kết quả khám bệnh
+    private String medicalReportPath;
 
-    // Constructor không tham số (bắt buộc cho JPA)
-    public Booking() {}
+    // Constructor không tham số
+    public Booking() {
+    }
 
     // Constructor có tham số
-    public Booking(Slot slot, String fullName, String gender, String email,
+    public Booking(User user, Slot slot, String fullName, String gender, String email,
                    String phoneNumber, LocalDate dob, String reason, Double fee, BookingStatus status) {
+        this.user = user;
         this.slot = slot;
         this.fullName = fullName;
         this.gender = gender;
@@ -52,23 +57,6 @@ public class Booking {
         this.status = status;
     }
 
-    // Getters và Setters
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-
-    public Slot getSlot() {
-        return slot;
-    }
-
-    public void setSlot(Slot slot) {
-        this.slot = slot;
-    }
-
     public String getFullName() {
         return fullName;
     }
@@ -77,28 +65,12 @@ public class Booking {
         this.fullName = fullName;
     }
 
-    public String getGender() {
-        return gender;
-    }
-
-    public void setGender(String gender) {
-        this.gender = gender;
-    }
-
     public String getEmail() {
         return email;
     }
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPhoneNumber() {
-        return phoneNumber;
-    }
-
-    public void setPhoneNumber(String phoneNumber) {
-        this.phoneNumber = phoneNumber;
     }
 
     public LocalDate getDob() {
@@ -117,14 +89,6 @@ public class Booking {
         this.reason = reason;
     }
 
-    public Double getFee() {
-        return fee;
-    }
-
-    public void setFee(Double fee) {
-        this.fee = fee;
-    }
-
     public BookingStatus getStatus() {
         return status;
     }
@@ -140,5 +104,52 @@ public class Booking {
     public void setMedicalReportPath(String medicalReportPath) {
         this.medicalReportPath = medicalReportPath;
     }
-}
 
+    public Double getFee() {
+        return fee;
+    }
+
+    public void setFee(Double fee) {
+        this.fee = fee;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
+    }
+
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
+    }
+
+    public Slot getSlot() {
+        return slot;
+    }
+
+    public void setSlot(Slot slot) {
+        this.slot = slot;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+}

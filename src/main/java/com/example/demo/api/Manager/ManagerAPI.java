@@ -1,57 +1,51 @@
 package com.example.demo.api.Manager;
 
-import com.example.demo.entity.Tests;
+import com.example.demo.DTO.PsychologistDetailsDTO;
 import com.example.demo.entity.User;
 import com.example.demo.entity.request.AccountRequest;
-import com.example.demo.enums.RoleEnum;
-import com.example.demo.service.AuthenticationService;
 import com.example.demo.service.ManagerService;
-import com.example.demo.service.TestService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 @RestController
 @RequestMapping("/api/manager")
 @SecurityRequirement(name = "api")
-@PreAuthorize("hasAuthority('MANAGER')") // Chỉ MANAGER amới có quyền truy cập
+@PreAuthorize("hasAuthority('MANAGER')")
 public class ManagerAPI {
+    private final ManagerService managerService;
 
     @Autowired
-    AuthenticationService authenticationService;
-
-    @Autowired
-    ManagerService managerService;
-
-    @GetMapping
-    public ResponseEntity getAllUser(){
-        List<User> users = managerService.getAllUser();
-        return ResponseEntity.ok(users);
+    public ManagerAPI(ManagerService managerService) {
+        this.managerService = managerService;
     }
 
-    @DeleteMapping("{id}")
-    public ResponseEntity deleteUser(@PathVariable long id){
-        User user = managerService.deleteUser(id);
-        return ResponseEntity.ok(user);
+    @GetMapping
+    public ResponseEntity<List<User>> getAllUser() {
+        return ResponseEntity.ok(managerService.getAllUser());
+    }
+
+    @PostMapping("/create-psychologist")
+    public ResponseEntity<User> createPsychologist(@RequestBody AccountRequest request) {
+        return ResponseEntity.ok(managerService.createPsychologist(request));
     }
 
     @PutMapping("/{id}")
-    public User updateUser(@PathVariable Long id, @RequestBody AccountRequest user) {
-        return managerService.updateUser(id, user);
+    public ResponseEntity<User> updatePsychologist(@PathVariable Long id, @RequestBody AccountRequest request) {
+        return ResponseEntity.ok(managerService.updatePsychologist(id, request));
     }
 
-    @PostMapping("/register-psychologist")
-    public ResponseEntity<User> registerPsychologist(@RequestBody AccountRequest accountRequest) {
-        accountRequest.setRoleEnum(RoleEnum.PSYCHOLOGIST);
-        User psychologist = authenticationService.register(accountRequest);
-        return ResponseEntity.ok(psychologist);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<User> deleteUser(@PathVariable Long id) {
+        return ResponseEntity.ok(managerService.deleteUser(id));
     }
 
-
+    // Thêm endpoint mới để xem chi tiết psychologist
+    @GetMapping("/{id}/details")
+    public ResponseEntity<PsychologistDetailsDTO> getPsychologistDetails(@PathVariable Long id) {
+        return ResponseEntity.ok(managerService.getPsychologistDetails(id));
+    }
 }

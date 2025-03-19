@@ -1,53 +1,67 @@
 package com.example.demo.entity;
 
+import com.example.demo.enums.AvailabilityStatus;
 import jakarta.persistence.*;
-import lombok.Builder;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 
 @Entity
-@Getter
-@Setter
-
-@Builder
 public class Slot {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-
     @Column(name = "slot_id")
     private Integer slotId;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; // Liên kết trực tiếp với User (psychologist)
 
     private LocalDate availableDate;
     private LocalTime startTime;
     private LocalTime endTime;
 
+    @Enumerated(EnumType.STRING)
+    private AvailabilityStatus availabilityStatus; // Trạng thái khả dụng (AVAILABLE, BOOKED)
+
+    // Constructor mặc định
     public Slot() {
     }
 
-    public Slot(Integer slotId, LocalDate availableDate, LocalTime startTime, LocalTime endTime, boolean available) {
+    // Constructor đầy đủ tham số
+    public Slot(Integer slotId, User user, LocalDate availableDate, LocalTime startTime, LocalTime endTime, AvailabilityStatus availabilityStatus) {
         this.slotId = slotId;
+        this.user = user;
         this.availableDate = availableDate;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.available = available;
+        this.availabilityStatus = availabilityStatus;
     }
 
+    // Phương thức tĩnh để trả về SlotBuilder
     public static SlotBuilder builder() {
         return new SlotBuilder();
     }
 
+    // Lớp SlotBuilder
     public static class SlotBuilder {
         private Integer slotId;
+        private User user;
         private LocalDate availableDate;
         private LocalTime startTime;
         private LocalTime endTime;
-        private boolean available = true;
+        private AvailabilityStatus availabilityStatus;
+
+        public SlotBuilder() {
+        }
 
         public SlotBuilder slotId(Integer slotId) {
             this.slotId = slotId;
+            return this;
+        }
+
+        public SlotBuilder user(User user) {
+            this.user = user;
             return this;
         }
 
@@ -66,38 +80,31 @@ public class Slot {
             return this;
         }
 
-        public SlotBuilder available(boolean available) {
-            this.available = available;
+        public SlotBuilder availabilityStatus(AvailabilityStatus availabilityStatus) {
+            this.availabilityStatus = availabilityStatus;
             return this;
         }
 
         public Slot build() {
-            return new Slot(slotId, availableDate, startTime, endTime, available);
+            return new Slot(slotId, user, availableDate, startTime, endTime, availabilityStatus);
         }
     }
 
-    public LocalTime getStartTime() {
-        return startTime;
+    // Getter và Setter
+    public Integer getSlotId() {
+        return slotId;
     }
 
-    public boolean isAvailable() {
-        return available;
+    public void setSlotId(Integer slotId) {
+        this.slotId = slotId;
     }
 
-    public void setAvailable(boolean available) {
-        this.available = available;
+    public User getUser() {
+        return user;
     }
 
-    public LocalTime getEndTime() {
-        return endTime;
-    }
-
-    public void setEndTime(LocalTime endTime) {
-        this.endTime = endTime;
-    }
-
-    public void setStartTime(LocalTime startTime) {
-        this.startTime = startTime;
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public LocalDate getAvailableDate() {
@@ -108,16 +115,27 @@ public class Slot {
         this.availableDate = availableDate;
     }
 
-    public Integer getSlotId() {
-        return slotId;
+    public LocalTime getStartTime() {
+        return startTime;
     }
 
-    public void setSlotId(Integer slotId) {
-        this.slotId = slotId;
+    public void setStartTime(LocalTime startTime) {
+        this.startTime = startTime;
     }
 
-    @Getter
-    @Setter
-    private boolean available = true; // Thêm cột này nếu chưa có
+    public LocalTime getEndTime() {
+        return endTime;
+    }
 
+    public void setEndTime(LocalTime endTime) {
+        this.endTime = endTime;
+    }
+
+    public AvailabilityStatus getAvailabilityStatus() {
+        return availabilityStatus;
+    }
+
+    public void setAvailabilityStatus(AvailabilityStatus availabilityStatus) {
+        this.availabilityStatus = availabilityStatus;
+    }
 }

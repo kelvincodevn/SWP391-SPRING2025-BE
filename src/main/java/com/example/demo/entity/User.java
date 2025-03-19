@@ -6,8 +6,9 @@ import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+
+import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,7 +34,7 @@ public class User implements UserDetails {
     private String email;
 
 
-    private LocalDateTime dob;
+    private LocalDate dob;
 
     private String phone;
 
@@ -51,6 +52,9 @@ public class User implements UserDetails {
 
     @Enumerated(value = EnumType.STRING)
     public RoleEnum roleEnum;
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private UserDetail userDetail;
 
     @Transient // Không lưu vào database
     private List<GrantedAuthority> authorities;
@@ -72,9 +76,19 @@ public class User implements UserDetails {
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDateTime.now();
+        this.status = true;
     }
 
     // Getters and Setters
+
+    // Thêm getter và setter cho userDetail
+    public UserDetail getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+    }
 
     public Long getUserID() {
         return userID;
@@ -92,12 +106,17 @@ public class User implements UserDetails {
         this.username = username;
     }
 
+//    @Override
+//    public Collection<? extends GrantedAuthority> getAuthorities() {
+//        List<GrantedAuthority> authorities = new ArrayList<>();
+//        authorities.add(new SimpleGrantedAuthority(roleEnum.name())); // Thêm vai trò vào danh sách
+//
+//        return authorities;
+//    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        List<GrantedAuthority> authorities = new ArrayList<>();
-        authorities.add(new SimpleGrantedAuthority(roleEnum.name())); // Thêm vai trò vào danh sách
-
-        return authorities;
+        return Collections.singletonList(new SimpleGrantedAuthority(roleEnum.name()));
     }
 
     @Override
@@ -150,11 +169,11 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public LocalDateTime getDob() {
+    public LocalDate getDob() {
         return dob;
     }
 
-    public void setDob(LocalDateTime dob) {
+    public void setDob(LocalDate dob) {
         this.dob = dob;
     }
 
@@ -201,7 +220,7 @@ public class User implements UserDetails {
     // Constructor with all fields
 
 
-    public User(Long userID, String username, String password, String fullName, String email, LocalDateTime dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, RoleEnum roleEnum) {
+    public User(Long userID, String username, String password, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, RoleEnum roleEnum) {
         this.userID = userID;
         this.username = username;
         this.password = password;

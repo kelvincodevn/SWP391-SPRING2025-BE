@@ -1,12 +1,32 @@
 package com.example.demo.entity.request;
 
 import com.example.demo.enums.RoleEnum;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
 
 public class AccountRequest {
-    public String fullName;
-    public String username;
-    public String email;
-    public String password;
+//    public String fullName;
+//    public String username;
+//    public String email;
+//    public String password;
+
+
+    @NotBlank(message = "Username is required")
+    @Size(min = 4, max = 20, message = "Username must be between 4 and 20 characters")
+    private String username;
+
+    @NotBlank(message = "Full name is required")
+    private String fullName;
+
+    @NotBlank(message = "Password is required")
+    @Size(min = 6, message = "Password must be at least 6 characters")
+    private String password;
+
+    @NotBlank(message = "Email is required")
+    @Email(message = "Invalid email format")
+    private String email;
+
     public RoleEnum roleEnum;
 
     public RoleEnum getRoleEnum() {
