@@ -1,5 +1,7 @@
 package com.example.demo.api.Manager;
 
+import com.example.demo.DTO.ProgramDTO;
+import com.example.demo.DTO.ProgramViewDTO;
 import com.example.demo.entity.Program;
 import com.example.demo.service.ProgramService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -19,25 +21,34 @@ public class ProgramAPI {
 
     @PreAuthorize("hasAuthority('MANAGER')") // Chỉ MANAGER amới có quyền truy cập
     @PostMapping
-    public ResponseEntity createProgram(@Valid @RequestBody Program program){
+    public ResponseEntity createProgram(@Valid @RequestBody ProgramDTO program){
         Program newProgram = programService.createProgram(program);
         return ResponseEntity.ok(program);
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @GetMapping
-    public ResponseEntity getAllProgram(){
-        List<Program> programs = programService.getAllProgram();
+    public ResponseEntity getAllProgramForManager(){
+        List<ProgramViewDTO> programs = programService.getAllPrograms();
         return ResponseEntity.ok(programs);
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @DeleteMapping("{id}")
     public ResponseEntity deleteProgram(@PathVariable long id){
         Program program = programService.deleteProgram(id);
         return ResponseEntity.ok(program);
     }
 
+    @PreAuthorize("hasAuthority('MANAGER')")
     @PutMapping("/{id}")
     public Program updateProgram(@PathVariable Long id, @RequestBody Program program) {
         return programService.updateProgram(id, program);
+    }
+
+    @PreAuthorize("hasAuthority('MANAGER')")
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getProgramDetailsForManager(@PathVariable Long id) {
+        return programService.getProgramDetails(id);
     }
 }

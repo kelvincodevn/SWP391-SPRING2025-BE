@@ -1,50 +1,28 @@
-package com.example.demo.entity;
+package com.example.demo.DTO;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import jakarta.persistence.*;
-
-@Entity
-@Table(name = "programs")
-public class Program {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long programID;
-
-
+public class ProgramDetailDTO {
     private String programName;
-
-
     private String programCategory;
-
-
     private String programDescription;
 
     private String programLink;
 
-    public boolean isDeleted = false;
-
-    public Program() {
+    public ProgramDetailDTO() {
     }
 
-    public Program(Long programID, String programName, String programCategory, String programDescription, String programLink, boolean isDeleted) {
-        this.programID = programID;
+    public ProgramDetailDTO(String programName, String programCategory, String programDescription, String programLink) {
         this.programName = programName;
         this.programCategory = programCategory;
         this.programDescription = programDescription;
         this.programLink = programLink;
-        this.isDeleted = isDeleted;
     }
 
     public String getProgramLink() {
-        return this.programLink;
+        return programLink;
     }
 
     public void setProgramLink(String programLink) {
         this.programLink = programLink;
-    }
-
-    public Long getProgramId() {
-        return programID;
     }
 
     public String getProgramName() {
@@ -71,11 +49,5 @@ public class Program {
         this.programDescription = programDescription;
     }
 
-    public boolean isDeleted() {
-        return isDeleted;
-    }
-
-    public void setDeleted(boolean deleted) {
-        isDeleted = deleted;
-    }
+    // Getters and setters
 }

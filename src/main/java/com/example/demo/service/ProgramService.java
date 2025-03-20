@@ -1,36 +1,74 @@
 package com.example.demo.service;
 
+import com.example.demo.DTO.ProgramDTO;
+import com.example.demo.DTO.ProgramDetailDTO;
+import com.example.demo.DTO.ProgramViewDTO;
 import com.example.demo.Repository.ProgramRepository;
 import com.example.demo.entity.Program;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 @Service
 public class ProgramService {
 
     @Autowired
     ProgramRepository programRepository;
 
-    public List<Program> getAllProgram() {
-        return programRepository.findAll();
+    public List<ProgramViewDTO> getAllPrograms() {
+        List<Program> programs = programRepository.findByIsDeletedFalse();
+
+        return programs.stream()
+                .map(p -> new ProgramViewDTO(p.getProgramId() ,p.getProgramName(), p.getProgramCategory()))
+                .collect(Collectors.toList());
     }
 
-    public Program createProgram(Program program) {
-        Program newProgram = null;  // Khai báo biến trước
+    public ResponseEntity<?> getProgramDetails(Long programId) {
+        Optional<Program> programOptional = programRepository.findById(programId);
+
+        if (programOptional.isEmpty() || programOptional.get().isDeleted()) {
+            return ResponseEntity.badRequest().body("Program not found or has been deleted.");
+        }
+
+        Program program = programOptional.get();
+        ProgramDetailDTO programDetail = new ProgramDetailDTO(
+                program.getProgramName(),
+                program.getProgramCategory(),
+                program.getProgramDescription(),
+                program.getProgramLink()
+        );
+
+        return ResponseEntity.ok(programDetail);
+    }
+
+
+
+    public Program createProgram(ProgramDTO programDTO) {
         try {
-            newProgram = programRepository.save(program);
+            Program program = new Program();
+            program.setProgramName(programDTO.getProgramName());
+            program.setProgramCategory(programDTO.getProgramCategory());
+            program.setProgramDescription(programDTO.getProgramDescription());
+            program.setProgramLink(programDTO.getProgramLink());
+            program.setDeleted(false);
+
+            return programRepository.save(program);
         } catch (Exception e) {
             System.err.println("Error saving program: " + e.getMessage());
+            return null; // Return null if there's an error
         }
-        return newProgram;  // Trả về null nếu có lỗi
     }
+
+
 
 
     public Program deleteProgram(long id) {
         Program program = programRepository.findProgramByprogramID(id);
-        program.isDeleted = true;
+        program.setDeleted(true);
         return programRepository.save(program);
     }
 
@@ -41,6 +79,7 @@ public class ProgramService {
             newProgram.setProgramName(program.getProgramName());
             newProgram.setProgramDescription(program.getProgramDescription());
             newProgram.setProgramCategory(program.getProgramCategory());
+            newProgram.setProgramLink(program.getProgramLink());
             return programRepository.save(newProgram);
         } else {
             throw new RuntimeException("User not found with id: " + id);
