@@ -14,4 +14,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
     List<User> findByRoleEnumAndIsDeletedFalse(RoleEnum roleEnum);
 
     Optional<User> findByUsernameAndIsDeletedFalse(String username);
+
+    // Thêm phương thức findByEmail để tìm người dùng theo email
+    Optional<User> findByEmail(String email);
 }

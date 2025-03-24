@@ -8,4 +8,6 @@ import java.util.List;
 public interface TestResultRepository extends JpaRepository<TestResult, Long> {
 
     List<TestResult> findByUser_UserID(Long userId);
+
+    
 }

@@ -17,11 +17,23 @@ public class AuthenticationAPI {
     @Autowired
     AuthenticationService authenticationService;
 
+//    @PostMapping("register")
+//    public ResponseEntity register(@Valid @RequestBody AccountRequest user){
+//        User newUser = authenticationService.register(user);
+//        return ResponseEntity.ok(newUser);
+//        //HttpStatus.CREATED (200)
+//    }
+
     @PostMapping("register")
-    public ResponseEntity register(@Valid @RequestBody AccountRequest user){
-        User newUser = authenticationService.register(user);
-        return ResponseEntity.ok(newUser);
-        //HttpStatus.CREATED (200)
+    public ResponseEntity<?> register(@Valid @RequestBody AccountRequest user) {
+        try {
+            User newUser = authenticationService.register(user);
+            return ResponseEntity.ok(newUser);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("An error occurred during registration: " + e.getMessage());
+        }
     }
 
     @PostMapping("login")
