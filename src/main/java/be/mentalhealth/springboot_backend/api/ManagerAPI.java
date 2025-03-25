@@ -1,6 +1,8 @@
 package be.mentalhealth.springboot_backend.api;
 
 
+import be.mentalhealth.springboot_backend.DTO.UserDetailDTO;
+import be.mentalhealth.springboot_backend.DTO.UserViewDTO;
 import be.mentalhealth.springboot_backend.service.ManagerService;
 import be.mentalhealth.springboot_backend.entity.User;
 import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
@@ -20,8 +22,13 @@ public class ManagerAPI {
 
     @GetMapping
     public ResponseEntity getAllUser(){
-        List<User> users = managerService.getAllUser();
+        List<UserViewDTO> users = managerService.getAllUser();
         return ResponseEntity.ok(users);
+    }
+
+    @GetMapping("/{userId}")
+    public UserDetailDTO getUserById(@PathVariable Long userId) {
+        return managerService.getUserById(userId);
     }
 
     @DeleteMapping("{id}")

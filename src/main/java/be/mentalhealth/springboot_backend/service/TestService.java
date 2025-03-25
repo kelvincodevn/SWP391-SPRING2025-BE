@@ -156,14 +156,10 @@ public class TestService {
             }
             rowIterator.next(); // Skip header
 
-            // Extract data from Excel
             Map<String, List<ExcelRow>> testDataMap = extractExcelData(rowIterator);
-
-            // ✅ Fetch existing tests (including deleted ones)
             Set<String> testNames = testDataMap.keySet();
             List<Tests> existingTests = testsRepository.findByTestsNameIn(testNames);
 
-            // Categorize tests: Active, Deleted
             Map<String, Tests> activeTests = new HashMap<>();
             Map<String, Tests> deletedTests = new HashMap<>();
 
@@ -175,35 +171,27 @@ public class TestService {
                 }
             }
 
-            // Remove fully active tests (to avoid duplicates)
             testDataMap.keySet().removeAll(activeTests.keySet());
-
             if (testDataMap.isEmpty()) {
                 return ResponseEntity.badRequest().body("All test names already exist and are active.");
             }
 
-            // ✅ Restore deleted tests if they exist
             for (String testName : deletedTests.keySet()) {
                 Tests deletedTest = deletedTests.get(testName);
                 deletedTest.setDeleted(false);
-                testsRepository.save(deletedTest); // Restore the test
-                testDataMap.remove(testName); // Remove restored tests from processing
+                testsRepository.save(deletedTest);
+                testDataMap.remove(testName);
             }
 
-            // ✅ Process and save only new tests
             if (!testDataMap.isEmpty()) {
                 processExcelData(testDataMap);
             }
 
             return ResponseEntity.ok("File processed successfully. Restored deleted tests and added new ones.");
-
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error processing Excel file: " + e.getMessage());
         }
     }
-
-
-
 
     private void processExcelData(Map<String, List<ExcelRow>> testDataMap) {
         Set<String> testNames = testDataMap.keySet();
