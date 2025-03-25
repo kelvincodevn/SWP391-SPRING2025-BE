@@ -10,11 +10,9 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
-
     List<User> findByRoleEnumAndIsDeletedFalse(RoleEnum roleEnum);
-
+//    Optional<User> findByUsernameAndIsDeletedFalse(String username);
     Optional<User> findByUsernameAndIsDeletedFalse(String username);
-
-    // Thêm phương thức findByEmail để tìm người dùng theo email
+    Optional<User> findByEmailAndIsDeletedFalse(String email);
     Optional<User> findByEmail(String email);
 }

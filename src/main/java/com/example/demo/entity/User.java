@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.enums.RoleEnum;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -9,6 +10,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -33,63 +35,40 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String email;
 
-
     private LocalDate dob;
 
     private String phone;
 
-
     private LocalDateTime createdDate;
-
 
     private Boolean status;
 
-
     private String gender;
-
 
     private String avatar;
 
     @Enumerated(value = EnumType.STRING)
-    public RoleEnum roleEnum;
+    private RoleEnum roleEnum;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetail userDetail;
 
-    @Transient // Không lưu vào database
-    private List<GrantedAuthority> authorities;
+    // Mối quan hệ với ParentStudent (phụ huynh quản lý học sinh)
+    @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Ngắt vòng lặp
+    private List<ParentStudent> managedStudents = new ArrayList<>();
 
-    public void setAuthorities(List<GrantedAuthority> authorities) {
-        this.authorities = authorities;
-    }
+    // Mối quan hệ với ParentStudent (học sinh được quản lý bởi phụ huynh)
+    @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore // Ngắt vòng lặp
+    private List<ParentStudent> managedByParents = new ArrayList<>();
+
+    @Transient
+    private List<GrantedAuthority> authorities;
 
     public boolean isDeleted = false;
 
-    public RoleEnum getRoleEnum() {
-        return roleEnum;
-    }
-
-    public void setRoleEnum(RoleEnum roleEnum) {
-        this.roleEnum = roleEnum;
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        this.createdDate = LocalDateTime.now();
-        this.status = true;
-    }
-
-    // Getters and Setters
-
-    // Thêm getter và setter cho userDetail
-    public UserDetail getUserDetail() {
-        return userDetail;
-    }
-
-    public void setUserDetail(UserDetail userDetail) {
-        this.userDetail = userDetail;
-    }
-
+    // Getters và Setters
     public Long getUserID() {
         return userID;
     }
@@ -98,55 +77,16 @@ public class User implements UserDetails {
         this.userID = userID;
     }
 
-    public String getUserName() {
+    public String getUsername() {
         return username;
     }
 
-    public void setUserName(String username) {
+    public void setUsername(String username) {
         this.username = username;
     }
 
-//    @Override
-//    public Collection<? extends GrantedAuthority> getAuthorities() {
-//        List<GrantedAuthority> authorities = new ArrayList<>();
-//        authorities.add(new SimpleGrantedAuthority(roleEnum.name())); // Thêm vai trò vào danh sách
-//
-//        return authorities;
-//    }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.singletonList(new SimpleGrantedAuthority(roleEnum.name()));
-    }
-
-    @Override
     public String getPassword() {
         return password;
-    }
-
-    @Override
-    public String getUsername() {
-        return username; // Fix: return userName instead of null
-    }
-
-    @Override
-    public boolean isAccountNonExpired() {
-        return true; // Adjust logic as needed
-    }
-
-    @Override
-    public boolean isAccountNonLocked() {
-        return true; // Adjust logic as needed
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true; // Adjust logic as needed
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return true; // Ensure status is checked
     }
 
     public void setPassword(String password) {
@@ -217,8 +157,75 @@ public class User implements UserDetails {
         this.avatar = avatar;
     }
 
-    // Constructor with all fields
+    public RoleEnum getRoleEnum() {
+        return roleEnum;
+    }
 
+    public void setRoleEnum(RoleEnum roleEnum) {
+        this.roleEnum = roleEnum;
+    }
+
+    public UserDetail getUserDetail() {
+        return userDetail;
+    }
+
+    public void setUserDetail(UserDetail userDetail) {
+        this.userDetail = userDetail;
+    }
+
+    public List<ParentStudent> getManagedStudents() {
+        return managedStudents;
+    }
+
+    public void setManagedStudents(List<ParentStudent> managedStudents) {
+        this.managedStudents = managedStudents;
+    }
+
+    public List<ParentStudent> getManagedByParents() {
+        return managedByParents;
+    }
+
+    public void setManagedByParents(List<ParentStudent> managedByParents) {
+        this.managedByParents = managedByParents;
+    }
+
+    public void setAuthorities(List<GrantedAuthority> authorities) {
+        this.authorities = authorities;
+    }
+
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        return Collections.singletonList(new SimpleGrantedAuthority(roleEnum.name()));
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return true;
+    }
+
+    @PrePersist
+    protected void onCreate() {
+        this.createdDate = LocalDateTime.now();
+        this.status = true;
+    }
+
+    public User() {
+    }
 
     public User(Long userID, String username, String password, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, RoleEnum roleEnum) {
         this.userID = userID;
@@ -233,13 +240,6 @@ public class User implements UserDetails {
         this.gender = gender;
         this.avatar = avatar;
         this.roleEnum = roleEnum;
-    }
-
-    public User() {
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
     }
 
     public void updateUser(UserDTO request) {
