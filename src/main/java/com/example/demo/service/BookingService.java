@@ -54,7 +54,7 @@ public class BookingService {
         booking.setReason(request.getReason());
         // Lấy fee từ UserDetail của psychologist
         Double fee = slot.getUser().getUserDetail().getFee();
-        booking.setFee(fee != null ? fee : 70000.0);
+        booking.setFee(fee != null ? fee : 150000.0);
         booking.setStatus(BookingStatus.PENDING);
 
         // Lưu booking

@@ -62,6 +62,7 @@ public class ManagerService {
                 .major("")
                 .workplace("")
                 .degree("")
+                .fee(Double.parseDouble("150000"))
                 .build();
         userDetailRepository.save(detail);
 

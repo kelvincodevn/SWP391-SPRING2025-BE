@@ -11,6 +11,7 @@ import com.example.demo.entity.response.AuthenticationResponse;
 import com.example.demo.enums.RoleEnum;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
@@ -61,14 +62,73 @@ public class AuthenticationService implements UserDetailsService {
 //        return newUser;
 //    }
 
+    //code cu sẽ xóa sau
+//    public User register(AccountRequest accountRequest) {
+//        User user = new User();
+//        user.setUsername(accountRequest.getUsername());
+//        user.setRoleEnum(accountRequest.getRoleEnum() != null ? accountRequest.getRoleEnum() : RoleEnum.STUDENT);
+//        user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
+//        user.setFullName(accountRequest.getFullName());
+//        user.setEmail(accountRequest.getEmail());
+//        return authenticationRepository.save(user);
+//    }
+
+//    public User register(AccountRequest accountRequest) {
+//        // Kiểm tra vai trò hợp lệ
+//        if (accountRequest.getRoleEnum() == null ||
+//                !(accountRequest.getRoleEnum() == RoleEnum.STUDENT || accountRequest.getRoleEnum() == RoleEnum.PARENT)) {
+//            throw new IllegalArgumentException("Invalid role. Only STUDENT or PARENT roles are allowed for registration.");
+//        }
+//
+//        // Kiểm tra xem username đã tồn tại chưa
+//        if (userRepository.findByUsername(accountRequest.getUsername()).isPresent()) {
+//            throw new IllegalArgumentException("Username already exists.");
+//        }
+//
+//        // Kiểm tra xem email đã tồn tại chưa
+//        if (userRepository.findByEmail(accountRequest.getEmail()).isPresent()) {
+//            throw new IllegalArgumentException("Email already exists.");
+//        }
+//
+//        User user = new User();
+//        user.setUsername(accountRequest.getUsername());
+//        user.setRoleEnum(accountRequest.getRoleEnum());
+//        user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
+//        user.setFullName(accountRequest.getFullName());
+//        user.setEmail(accountRequest.getEmail());
+//
+//        return authenticationRepository.save(user);
+//    }
+
     public User register(AccountRequest accountRequest) {
-        User user = new User();
-        user.setUsername(accountRequest.getUsername());
-        user.setRoleEnum(accountRequest.getRoleEnum() != null ? accountRequest.getRoleEnum() : RoleEnum.STUDENT);
-        user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
-        user.setFullName(accountRequest.getFullName());
-        user.setEmail(accountRequest.getEmail());
-        return authenticationRepository.save(user);
+        // Kiểm tra vai trò hợp lệ
+        if (accountRequest.getRoleEnum() == null ||
+                !(accountRequest.getRoleEnum() == RoleEnum.STUDENT || accountRequest.getRoleEnum() == RoleEnum.PARENT)) {
+            throw new IllegalArgumentException("Invalid role. Only STUDENT or PARENT roles are allowed for registration.");
+        }
+
+        // Kiểm tra xem username đã tồn tại chưa
+        if (userRepository.findByUsername(accountRequest.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Username already exists.");
+        }
+
+        // Kiểm tra xem email đã tồn tại chưa
+        if (userRepository.findByEmailAndIsDeletedFalse(accountRequest.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email already exists.");
+        }
+
+        try {
+            User user = new User();
+            user.setUsername(accountRequest.getUsername());
+            user.setRoleEnum(accountRequest.getRoleEnum());
+            user.setPassword(passwordEncoder.encode(accountRequest.getPassword()));
+            user.setFullName(accountRequest.getFullName());
+            user.setEmail(accountRequest.getEmail());
+
+            return authenticationRepository.save(user);
+        } catch (DataIntegrityViolationException e) {
+            throw new IllegalArgumentException("Email already exists in the database.", e);
+        }
     }
 
 
