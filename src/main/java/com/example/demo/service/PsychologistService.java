@@ -1,15 +1,21 @@
 package com.example.demo.service;
 
+import com.example.demo.DTO.PsychologistDetailsDTO;
 import com.example.demo.Repository.BookingRepository;
 import com.example.demo.Repository.TestResultRepository;
 import com.example.demo.Repository.UserRepository;
 import com.example.demo.entity.TestResult;
 import com.example.demo.entity.User;
+import com.example.demo.entity.UserDetail;
 import com.example.demo.enums.RoleEnum;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class PsychologistService {
@@ -25,6 +31,14 @@ public class PsychologistService {
 
     @Autowired
     TestResultRepository testResultRepository;
+
+    // Lấy thông tin psychologist hiện tại từ Security Context
+    public User getCurrentPsychologist() {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        return userRepository.findByUsername(username)
+                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST && !u.isDeleted)
+                .orElseThrow(() -> new UsernameNotFoundException("Psychologist not found"));
+    }
 
     public List<User> getAllPsychologists() {
         return userRepository.findByRoleEnumAndIsDeletedFalse(RoleEnum.PSYCHOLOGIST);
@@ -110,54 +124,97 @@ public class PsychologistService {
 //        return clients;
 //    }
 
-//    public Map<String, Object> getPsychologistProfile(Long psychologistId) {
-//        User psychologist = userRepository.findById(psychologistId)
-//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST && !u.isDeleted())
-//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-//
-//        Map<String, Object> profile = new HashMap<>();
-//        profile.put("id", psychologist.getId());
-//        profile.put("fullName", psychologist.getFullName());
-//        profile.put("email", psychologist.getEmail());
-//        profile.put("major", psychologist.getMajor());
-//        profile.put("degree", psychologist.getDegree());
-//        profile.put("createdAt", psychologist.getCreatedAt());
-//
-//        return profile;
-//    }
+    public PsychologistDetailsDTO getPsychologistProfile() {
+        User psychologist = getCurrentPsychologist();
+        UserDetail userDetail = psychologist.getUserDetail();
+        if (userDetail == null) {
+            throw new RuntimeException("UserDetail not found for this psychologist");
+        }
 
-//    public Map<String, Object> updatePsychologistProfile(Long psychologistId, Map<String, Object> profileData) {
-//        User psychologist = userRepository.findById(psychologistId)
-//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST && !u.isDeleted())
-//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-//
-//        // Cập nhật các trường được gửi từ frontend
-//        if (profileData.containsKey("fullName")) {
-//            psychologist.setFullName((String) profileData.get("fullName"));
-//        }
-//        if (profileData.containsKey("email")) {
-//            psychologist.setEmail((String) profileData.get("email"));
-//        }
-//        if (profileData.containsKey("major")) {
-//            psychologist.setMajor((String) profileData.get("major"));
-//        }
-//        if (profileData.containsKey("degree")) {
-//            psychologist.setDegree((String) profileData.get("degree"));
-//        }
-//
-//        userRepository.save(psychologist);
-//
-//        // Trả về profile đã cập nhật
-//        Map<String, Object> updatedProfile = new HashMap<>();
-//        updatedProfile.put("id", psychologist.getId());
-//        updatedProfile.put("fullName", psychologist.getFullName());
-//        updatedProfile.put("email", psychologist.getEmail());
-//        updatedProfile.put("major", psychologist.getMajor());
-//        updatedProfile.put("degree", psychologist.getDegree());
-//        updatedProfile.put("createdAt", psychologist.getCreatedAt());
-//
-//        return updatedProfile;
-//    }
+        // Map User and UserDetail to PsychologistDetailsDTO
+        PsychologistDetailsDTO profile = new PsychologistDetailsDTO();
+        profile.setUsername(psychologist.getUsername());
+        profile.setFullName(psychologist.getFullName());
+        profile.setEmail(psychologist.getEmail());
+        profile.setDob(psychologist.getDob());
+        profile.setPhone(psychologist.getPhone());
+        profile.setCreatedDate(psychologist.getCreatedDate());
+        profile.setStatus(psychologist.getStatus());
+        profile.setGender(psychologist.getGender());
+        profile.setAvatar(psychologist.getAvatar());
+        profile.setMajor(userDetail.getMajor());
+        profile.setDegree(userDetail.getDegree());
+        profile.setWorkplace(userDetail.getWorkplace());
+        profile.setFee(userDetail.getFee());
+
+        return profile;
+    }
+
+    public PsychologistDetailsDTO updatePsychologistProfile(PsychologistDetailsDTO profileData) {
+        User psychologist = getCurrentPsychologist();
+        UserDetail userDetail = psychologist.getUserDetail();
+        if (userDetail == null) {
+            throw new RuntimeException("UserDetail not found for this psychologist");
+        }
+
+        // Update fields in User entity
+        if (profileData.getUsername() != null) {
+            psychologist.setUsername(profileData.getUsername());
+        }
+        if (profileData.getFullName() != null) {
+            psychologist.setFullName(profileData.getFullName());
+        }
+        if (profileData.getEmail() != null) {
+            psychologist.setEmail(profileData.getEmail());
+        }
+        if (profileData.getDob() != null) {
+            psychologist.setDob(profileData.getDob());
+        }
+        if (profileData.getPhone() != null) {
+            psychologist.setPhone(profileData.getPhone());
+        }
+        if (profileData.getGender() != null) {
+            psychologist.setGender(profileData.getGender());
+        }
+        if (profileData.getAvatar() != null) {
+            psychologist.setAvatar(profileData.getAvatar());
+        }
+
+        // Update fields in UserDetail entity
+        if (profileData.getMajor() != null) {
+            userDetail.setMajor(profileData.getMajor());
+        }
+        if (profileData.getDegree() != null) {
+            userDetail.setDegree(profileData.getDegree());
+        }
+        if (profileData.getWorkplace() != null) {
+            userDetail.setWorkplace(profileData.getWorkplace());
+        }
+        if (profileData.getFee() != null) {
+            userDetail.setFee(profileData.getFee());
+        }
+
+        // Save the updated User (which will cascade to UserDetail due to CascadeType.ALL)
+        userRepository.save(psychologist);
+
+        // Map the updated User and UserDetail to PsychologistDetailsDTO
+        PsychologistDetailsDTO updatedProfile = new PsychologistDetailsDTO();
+        updatedProfile.setUsername(psychologist.getUsername());
+        updatedProfile.setFullName(psychologist.getFullName());
+        updatedProfile.setEmail(psychologist.getEmail());
+        updatedProfile.setDob(psychologist.getDob());
+        updatedProfile.setPhone(psychologist.getPhone());
+        updatedProfile.setCreatedDate(psychologist.getCreatedDate());
+        updatedProfile.setStatus(psychologist.getStatus());
+        updatedProfile.setGender(psychologist.getGender());
+        updatedProfile.setAvatar(psychologist.getAvatar());
+        updatedProfile.setMajor(userDetail.getMajor());
+        updatedProfile.setDegree(userDetail.getDegree());
+        updatedProfile.setWorkplace(userDetail.getWorkplace());
+        updatedProfile.setFee(userDetail.getFee());
+
+        return updatedProfile;
+    }
 
 //    public List<Booking> findBookingsByPsychologistUserId(Long userId) {
 //        return bookingRepository.findByPsychologistSlot_Psychologist_UserID(userId);

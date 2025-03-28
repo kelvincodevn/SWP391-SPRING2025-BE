@@ -1,5 +1,6 @@
 package com.example.demo.api.Psychologist;
 
+import com.example.demo.DTO.PsychologistDetailsDTO;
 import com.example.demo.entity.Booking;
 import com.example.demo.entity.TestResult;
 import com.example.demo.entity.User;
@@ -47,21 +48,20 @@ public class PsychologistAPI {
 //        return psychologistService.findBookingsByPsychologistUserId(userId);
 //    }
 
-//    @GetMapping("/{psychologistId}/profile")
-//    @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
-//    public ResponseEntity<Map<String, Object>> getPsychologistProfile(@PathVariable Long psychologistId) {
-//        Map<String, Object> profile = psychologistService.getPsychologistProfile(psychologistId);
-//        return ResponseEntity.ok(profile);
-//    }
+    @GetMapping("/profile")
+    @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
+    public ResponseEntity<PsychologistDetailsDTO> getPsychologistProfile() {
+        PsychologistDetailsDTO profile = psychologistService.getPsychologistProfile();
+        return ResponseEntity.ok(profile);
+    }
 
-//    @PutMapping("/{psychologistId}/profile")
-//    @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
-//    public ResponseEntity<Map<String, Object>> updatePsychologistProfile(
-//            @PathVariable Long psychologistId,
-//            @RequestBody Map<String, Object> profileData) {
-//        Map<String, Object> updatedProfile = psychologistService.updatePsychologistProfile(psychologistId, profileData);
-//        return ResponseEntity.ok(updatedProfile);
-//    }
+    @PutMapping("/profile")
+    @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
+    public ResponseEntity<PsychologistDetailsDTO> updatePsychologistProfile(
+            @RequestBody PsychologistDetailsDTO profileData) {
+        PsychologistDetailsDTO updatedProfile = psychologistService.updatePsychologistProfile(profileData);
+        return ResponseEntity.ok(updatedProfile);
+    }
 
 //    @GetMapping("/booking-count")
 //    public long getBookingCount(@RequestParam Long userId) {
