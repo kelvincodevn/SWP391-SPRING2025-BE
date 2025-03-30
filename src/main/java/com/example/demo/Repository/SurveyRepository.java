@@ -1,9 +1,12 @@
 package com.example.demo.Repository;
 
-import com.example.demo.DTO.Survey;
+import com.example.demo.entity.Survey;
+import com.example.demo.enums.SurveyStatus;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import java.time.LocalDateTime;
+import java.util.List;
 
-@Repository
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
+    List<Survey> findByStatusAndStartTimeBeforeAndEndTimeAfter(
+            SurveyStatus status, LocalDateTime before, LocalDateTime after);
 }

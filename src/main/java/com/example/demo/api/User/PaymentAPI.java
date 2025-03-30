@@ -46,8 +46,8 @@ public class PaymentAPI {
     public ResponseEntity<String> createPaymentUrl(@RequestParam Integer bookingId, HttpServletRequest request) throws UnsupportedEncodingException {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-        if (booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new RuntimeException("Booking must be in CONFIRMED status");
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Booking must be in PENDING status");
         }
 
         String vnp_TxnRef = bookingId + "_" + System.currentTimeMillis();

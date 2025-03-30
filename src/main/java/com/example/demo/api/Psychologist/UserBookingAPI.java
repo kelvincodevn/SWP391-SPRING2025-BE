@@ -25,13 +25,6 @@ public class UserBookingAPI {
         return ResponseEntity.ok(bookingService.createBooking(userId, request));
     }
 
-    @GetMapping("/{bookingId}/confirm")
-    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
-    public ResponseEntity<String> confirmBooking(@PathVariable Integer bookingId) {
-        bookingService.confirmBooking(bookingId);
-        return ResponseEntity.ok("Booking confirmed successfully");
-    }
-
     @PostMapping("/{bookingId}/cancel")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
     public ResponseEntity<String> cancelBooking(@RequestParam Long userId, @PathVariable Integer bookingId) {

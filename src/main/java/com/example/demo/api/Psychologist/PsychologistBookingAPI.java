@@ -17,20 +17,6 @@ public class PsychologistBookingAPI {
     @Autowired
     BookingService bookingService;
 
-    @PostMapping("/{bookingId}/accept")
-    @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
-    public ResponseEntity<String> acceptBooking(@PathVariable Integer bookingId) {
-        bookingService.acceptBooking(bookingId);
-        return ResponseEntity.ok("Booking accepted");
-    }
-
-    @PostMapping("/{bookingId}/decline")
-    @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
-    public ResponseEntity<String> declineBooking(@PathVariable Integer bookingId) {
-        bookingService.declineBooking(bookingId);
-        return ResponseEntity.ok("Booking declined");
-    }
-
     @PostMapping(value = "/complete", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @PreAuthorize("hasAuthority('PSYCHOLOGIST')")
     public ResponseEntity<String> completeBooking(@RequestParam Integer bookingId, @RequestParam("file") MultipartFile file) {

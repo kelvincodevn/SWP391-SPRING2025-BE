@@ -1,5 +1,6 @@
 package com.example.demo.DTO;
 
+import com.example.demo.entity.Survey;
 import jakarta.persistence.*;
 import lombok.*;
 

@@ -27,8 +27,8 @@ public class PaymentService {
     public String createPaymentUrl(Integer bookingId, HttpServletRequest request) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
-        if (booking.getStatus() != BookingStatus.CONFIRMED) {
-            throw new RuntimeException("Booking must be CONFIRMED to proceed with payment");
+        if (booking.getStatus() != BookingStatus.PENDING) {
+            throw new RuntimeException("Booking must be PENDING to proceed with payment");
         }
 
         String orderId = bookingId + "_" + System.currentTimeMillis();

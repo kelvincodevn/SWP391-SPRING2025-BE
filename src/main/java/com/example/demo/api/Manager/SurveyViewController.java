@@ -1,6 +1,7 @@
 package com.example.demo.api.Manager;
 
-import com.example.demo.DTO.Survey;
+
+import com.example.demo.entity.Survey;
 import com.example.demo.service.SurveyService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
