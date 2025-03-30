@@ -41,19 +41,35 @@ public class SurveyService {
                 if (row.getRowNum() == 0) continue; // Bỏ qua header
 
                 surveyTitle = getCellValue(row.getCell(0)); // Survey Title
+                if (surveyTitle == null || surveyTitle.isEmpty()) {
+                    throw new IllegalArgumentException("Survey Title is required");
+                }
+
                 String questionText = getCellValue(row.getCell(1)); // Question Text
+                if (questionText == null || questionText.isEmpty()) {
+                    throw new IllegalArgumentException("Question Text is required in row " + (row.getRowNum() + 1));
+                }
+
                 String options = Arrays.stream(new String[]{
                                 getCellValue(row.getCell(2)), // Option A
                                 getCellValue(row.getCell(3)), // Option B
                                 getCellValue(row.getCell(4)), // Option C
                                 getCellValue(row.getCell(5))  // Option D
                         }).filter(opt -> opt != null && !opt.isEmpty())
-                        .collect(Collectors.joining(",")); // Lưu options dạng chuỗi
+                        .collect(Collectors.joining(","));
+
+                if (options.isEmpty()) {
+                    throw new IllegalArgumentException("At least one option is required for question in row " + (row.getRowNum() + 1));
+                }
 
                 SurveyQuestion question = new SurveyQuestion();
                 question.setQuestionText(questionText);
                 question.setOptions(options);
                 questions.add(question);
+            }
+
+            if (questions.isEmpty()) {
+                throw new IllegalArgumentException("Excel file must contain at least one question");
             }
 
             Survey survey = new Survey();
@@ -91,11 +107,15 @@ public class SurveyService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Survey> getActiveSurveys() {
         try {
             LocalDateTime now = LocalDateTime.now();
-            return surveyRepository.findByStatusAndStartTimeBeforeAndEndTimeAfter(
-                    SurveyStatus.ACTIVE, now, now);
+            List<Survey> activeSurveys = surveyRepository.findAllByStatus(SurveyStatus.ACTIVE);
+            return activeSurveys.stream()
+                    .filter(survey -> survey.getStartTime().isBefore(now) || survey.getStartTime().isEqual(now))
+                    .filter(survey -> survey.getEndTime() == null || survey.getEndTime().isAfter(now))
+                    .collect(Collectors.toList());
         } catch (Exception e) {
             throw new RuntimeException("Failed to fetch active surveys: " + e.getMessage(), e);
         }

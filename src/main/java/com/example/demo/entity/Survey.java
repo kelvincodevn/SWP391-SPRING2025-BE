@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import com.example.demo.enums.SurveyStatus;
 import com.example.demo.enums.ScheduleType;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -36,6 +37,7 @@ public class Survey {
     private User createdBy;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<SurveyQuestion> questions;
 
     @OneToMany(mappedBy = "survey", cascade = CascadeType.ALL, orphanRemoval = true)

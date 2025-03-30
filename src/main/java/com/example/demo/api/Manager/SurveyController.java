@@ -1,6 +1,5 @@
 package com.example.demo.api.Manager;
 
-import com.example.demo.DTO.SurveyRequestDTO;
 import com.example.demo.entity.Survey;
 import com.example.demo.entity.User;
 import com.example.demo.enums.ScheduleType;
@@ -15,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 
 @RestController
@@ -34,9 +35,12 @@ public class SurveyController {
             @RequestParam(value = "recurrenceInterval", required = false) String recurrenceInterval,
             @AuthenticationPrincipal User manager) {
         try {
+            // Parse ISO 8601 datetime string with timezone
+            DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+            LocalDateTime stTime = ZonedDateTime.parse(startTime, formatter).toLocalDateTime();
+            LocalDateTime eTime = endTime != null ? ZonedDateTime.parse(endTime, formatter).toLocalDateTime() : null;
+
             ScheduleType st = ScheduleType.valueOf(scheduleType);
-            LocalDateTime stTime = LocalDateTime.parse(startTime);
-            LocalDateTime eTime = endTime != null ? LocalDateTime.parse(endTime) : null;
             Survey survey = surveyService.createSurveyFromExcel(file, manager, st, stTime, eTime, recurrenceInterval);
             return ResponseEntity.ok(survey);
         } catch (Exception e) {

@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.util.List;
@@ -17,11 +18,12 @@ public class SurveyQuestion {
 
     @ManyToOne
     @JoinColumn(name = "survey_id", nullable = false)
+    @JsonBackReference
     private Survey survey;
 
     private String questionText;
 
-    @Column(columnDefinition = "TEXT") // Lưu options dưới dạng JSON hoặc chuỗi
+    @Column(columnDefinition = "TEXT")
     private String options; // e.g., "Good,Okay,Bad,Terrible"
 
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, orphanRemoval = true)

@@ -9,4 +9,6 @@ import java.util.List;
 public interface SurveyRepository extends JpaRepository<Survey, Long> {
     List<Survey> findByStatusAndStartTimeBeforeAndEndTimeAfter(
             SurveyStatus status, LocalDateTime before, LocalDateTime after);
+
+    List<Survey> findAllByStatus(SurveyStatus status);
 }
