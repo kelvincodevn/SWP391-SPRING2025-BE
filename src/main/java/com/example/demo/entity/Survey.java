@@ -1,11 +1,8 @@
 package com.example.demo.entity;
 
-import com.example.demo.enums.SurveyStatus;
-import com.example.demo.enums.ScheduleType;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -19,18 +16,8 @@ public class Survey {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String title;
-    private String description;
-
-    @Enumerated(EnumType.STRING)
-    private SurveyStatus status = SurveyStatus.DRAFT;
-
-    @Enumerated(EnumType.STRING)
-    private ScheduleType scheduleType = ScheduleType.ONE_TIME;
-
-    private LocalDateTime startTime;
-    private LocalDateTime endTime;
-    private String recurrenceInterval;
+    private String surveyName; // Thay title thành surveyName để đồng bộ với test
+    private String surveyDescription; // Thay description thành surveyDescription
 
     @ManyToOne
     @JoinColumn(name = "created_by", nullable = false)

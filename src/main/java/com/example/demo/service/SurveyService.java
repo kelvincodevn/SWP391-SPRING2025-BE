@@ -1,15 +1,10 @@
 package com.example.demo.service;
 
 import com.example.demo.DTO.SurveyResponseDTO;
-import com.example.demo.Repository.SurveyQuestionRepository;
-import com.example.demo.Repository.SurveyRepository;
-import com.example.demo.Repository.SurveyResponseRepository;
-import com.example.demo.Repository.UserRepository;
+import com.example.demo.Repository.*;
 import com.example.demo.entity.*;
-import com.example.demo.enums.*;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.*;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,7 +12,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -26,23 +20,26 @@ import java.util.stream.Collectors;
 public class SurveyService {
     private final SurveyRepository surveyRepository;
     private final SurveyQuestionRepository surveyQuestionRepository;
+    private final SurveyAnswerOptionRepository surveyAnswerOptionRepository;
     private final SurveyResponseRepository surveyResponseRepository;
+    private final SurveyAnswerRepository surveyAnswerRepository;
     private final UserRepository userRepository;
 
     @Transactional
-    public Survey createSurveyFromExcel(MultipartFile file, User manager, ScheduleType scheduleType, LocalDateTime startTime, LocalDateTime endTime, String recurrenceInterval) {
+    public Survey createSurveyFromExcel(MultipartFile file, User manager) {
         try {
             Workbook workbook = WorkbookFactory.create(file.getInputStream());
             Sheet sheet = workbook.getSheetAt(0);
             List<SurveyQuestion> questions = new ArrayList<>();
-            String surveyTitle = null;
+            String surveyName = null;
 
+            int questionNumber = 1;
             for (Row row : sheet) {
                 if (row.getRowNum() == 0) continue; // Bỏ qua header
 
-                surveyTitle = getCellValue(row.getCell(0)); // Survey Title
-                if (surveyTitle == null || surveyTitle.isEmpty()) {
-                    throw new IllegalArgumentException("Survey Title is required");
+                surveyName = getCellValue(row.getCell(0)); // Survey Name
+                if (surveyName == null || surveyName.isEmpty()) {
+                    throw new IllegalArgumentException("Survey Name is required");
                 }
 
                 String questionText = getCellValue(row.getCell(1)); // Question Text
@@ -50,21 +47,27 @@ public class SurveyService {
                     throw new IllegalArgumentException("Question Text is required in row " + (row.getRowNum() + 1));
                 }
 
-                String options = Arrays.stream(new String[]{
-                                getCellValue(row.getCell(2)), // Option A
-                                getCellValue(row.getCell(3)), // Option B
-                                getCellValue(row.getCell(4)), // Option C
-                                getCellValue(row.getCell(5))  // Option D
-                        }).filter(opt -> opt != null && !opt.isEmpty())
-                        .collect(Collectors.joining(","));
+                List<String> options = List.of(
+                        getCellValue(row.getCell(2)), // Option A
+                        getCellValue(row.getCell(3)), // Option B
+                        getCellValue(row.getCell(4)), // Option C
+                        getCellValue(row.getCell(5))  // Option D
+                ).stream().filter(opt -> opt != null && !opt.isEmpty()).collect(Collectors.toList());
 
                 if (options.isEmpty()) {
                     throw new IllegalArgumentException("At least one option is required for question in row " + (row.getRowNum() + 1));
                 }
 
                 SurveyQuestion question = new SurveyQuestion();
+                question.setQuestionNumber(questionNumber++);
                 question.setQuestionText(questionText);
-                question.setOptions(options);
+                List<SurveyAnswerOption> answerOptions = options.stream().map(opt -> {
+                    SurveyAnswerOption answerOption = new SurveyAnswerOption();
+                    answerOption.setAnswerText(opt);
+                    answerOption.setQuestion(question);
+                    return answerOption;
+                }).collect(Collectors.toList());
+                question.setAnswerOptions(answerOptions);
                 questions.add(question);
             }
 
@@ -73,14 +76,9 @@ public class SurveyService {
             }
 
             Survey survey = new Survey();
-            survey.setTitle(surveyTitle);
-            survey.setDescription("Imported from Excel");
-            survey.setScheduleType(scheduleType);
-            survey.setStartTime(startTime);
-            survey.setEndTime(endTime);
-            survey.setRecurrenceInterval(recurrenceInterval);
+            survey.setSurveyName(surveyName);
+            survey.setSurveyDescription("Imported from Excel");
             survey.setCreatedBy(manager);
-            survey.setStatus(SurveyStatus.DRAFT);
             survey.setQuestions(questions);
 
             questions.forEach(q -> q.setSurvey(survey));
@@ -100,90 +98,53 @@ public class SurveyService {
     }
 
     public List<Survey> getAllSurveys() {
-        try {
-            return surveyRepository.findAll();
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch all surveys: " + e.getMessage(), e);
-        }
+        return surveyRepository.findAll();
     }
 
     @Transactional(readOnly = true)
-    public List<Survey> getActiveSurveys() {
-        try {
-            LocalDateTime now = LocalDateTime.now();
-            List<Survey> activeSurveys = surveyRepository.findAllByStatus(SurveyStatus.ACTIVE);
-            return activeSurveys.stream()
-                    .filter(survey -> survey.getStartTime().isBefore(now) || survey.getStartTime().isEqual(now))
-                    .filter(survey -> survey.getEndTime() == null || survey.getEndTime().isAfter(now))
-                    .collect(Collectors.toList());
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch active surveys: " + e.getMessage(), e);
-        }
+    public Survey getSurveyDetails(Long surveyId) {
+        return surveyRepository.findById(surveyId)
+                .orElseThrow(() -> new IllegalArgumentException("Survey not found with ID: " + surveyId));
     }
 
     @Transactional
     public SurveyResponse submitSurveyResponse(SurveyResponseDTO request, User user) {
-        try {
-            Survey survey = surveyRepository.findById(request.getSurveyId())
-                    .orElseThrow(() -> new IllegalArgumentException("Survey not found with ID: " + request.getSurveyId()));
-            if (survey.getStatus() != SurveyStatus.ACTIVE) {
-                throw new IllegalStateException("Survey is not active");
-            }
+        Survey survey = surveyRepository.findById(request.getSurveyId())
+                .orElseThrow(() -> new IllegalArgumentException("Survey not found with ID: " + request.getSurveyId()));
 
-            SurveyResponse response = new SurveyResponse();
-            response.setSurvey(survey);
-            response.setUser(user);
+        SurveyResponse response = new SurveyResponse();
+        response.setSurvey(survey);
+        response.setUser(user);
+        response.setSubmittedAt(LocalDateTime.now());
 
-            List<SurveyAnswer> answers = request.getAnswers().stream().map(a -> {
-                try {
-                    SurveyAnswer answer = new SurveyAnswer();
-                    answer.setResponse(response);
-                    answer.setQuestion(surveyQuestionRepository.findById(a.getQuestionId())
-                            .orElseThrow(() -> new IllegalArgumentException("Question not found with ID: " + a.getQuestionId())));
-                    answer.setAnswerText(a.getAnswerText());
-                    return answer;
-                } catch (Exception e) {
-                    throw new RuntimeException("Failed to process answer for question ID " + a.getQuestionId() + ": " + e.getMessage(), e);
-                }
-            }).collect(Collectors.toList());
+        List<SurveyAnswer> answers = request.getAnswers().stream().map(a -> {
+            SurveyAnswer answer = new SurveyAnswer();
+            answer.setResponse(response);
+            // Chuyển đổi Integer thành Long
+            answer.setQuestion(surveyQuestionRepository.findById(Long.valueOf(a.getQuestionId()))
+                    .orElseThrow(() -> new IllegalArgumentException("Question not found with ID: " + a.getQuestionId())));
+            answer.setAnswerText(a.getAnswerText());
+            return answer;
+        }).collect(Collectors.toList());
 
-            response.setAnswers(answers);
-            return surveyResponseRepository.save(response);
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to submit survey response: " + e.getMessage(), e);
-        }
+        response.setAnswers(answers);
+        return surveyResponseRepository.save(response);
     }
 
-    @Scheduled(cron = "0 0 0 * * *") // Chạy hàng ngày lúc nửa đêm
-    public void activateRecurringSurveys() {
-        try {
-            List<Survey> recurringSurveys = surveyRepository.findAll().stream()
-                    .filter(s -> s.getScheduleType() == ScheduleType.RECURRING)
-                    .collect(Collectors.toList());
-
-            LocalDateTime now = LocalDateTime.now();
-            for (Survey survey : recurringSurveys) {
-                if (shouldActivateSurvey(survey, now)) {
-                    survey.setStatus(SurveyStatus.ACTIVE);
-                    survey.setStartTime(now);
-                    survey.setEndTime(calculateEndTime(survey, now));
-                    surveyRepository.save(survey);
-                }
-            }
-        } catch (Exception e) {
-            throw new RuntimeException("Failed to activate recurring surveys: " + e.getMessage(), e);
-        }
+    public List<SurveyResponse> getUserSurveyHistory(User user) {
+        return surveyResponseRepository.findByUser(user);
     }
 
-    private boolean shouldActivateSurvey(Survey survey, LocalDateTime now) {
-        return survey.getStartTime().isBefore(now) && survey.getStatus() == SurveyStatus.DRAFT;
+    public List<SurveyResponse> getAllSurveyHistory() {
+        return surveyResponseRepository.findAll();
     }
 
-    private LocalDateTime calculateEndTime(Survey survey, LocalDateTime start) {
-        switch (survey.getRecurrenceInterval()) {
-            case "MONTHLY": return start.plusMonths(1);
-            case "WEEKLY": return start.plusWeeks(1);
-            default: return start.plusDays(1);
-        }
+    public List<SurveyResponse> getSurveyHistoryByUser(Long userId) {
+        return surveyResponseRepository.findByUser_UserID(userId);
+    }
+
+    public SurveyResponse getSurveyResponseDetails(Long responseId) {
+        return surveyResponseRepository.findById(responseId)
+                .orElseThrow(() -> new IllegalArgumentException("Survey response not found with ID: " + responseId));
     }
 }

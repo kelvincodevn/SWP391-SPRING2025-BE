@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
@@ -24,8 +25,9 @@ public class SurveyResponse {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    private LocalDateTime submittedAt = LocalDateTime.now();
+    private LocalDateTime submittedAt;
 
     @OneToMany(mappedBy = "response", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<SurveyAnswer> answers;
 }

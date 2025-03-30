@@ -5,24 +5,20 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "survey_answers")
+@Table(name = "survey_answer_options")
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-public class SurveyAnswer {
+public class SurveyAnswerOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "response_id", nullable = false)
-    @JsonBackReference
-    private SurveyResponse response;
-
-    @ManyToOne
     @JoinColumn(name = "question_id", nullable = false)
+    @JsonBackReference
     private SurveyQuestion question;
 
-    private String answerText; // Câu trả lời student chọn, e.g., "Never"
+    private String answerText; // e.g., "Never", "Rarely", ...
 }
