@@ -9,6 +9,8 @@ import be.mentalhealth.springboot_backend.entity.User;
 import be.mentalhealth.springboot_backend.entity.request.AccountRequest;
 import be.mentalhealth.springboot_backend.entity.request.AuthenticationRequest;
 import be.mentalhealth.springboot_backend.entity.response.AuthenticationResponse;
+import be.mentalhealth.springboot_backend.exception.exceptions.InvalidCredentialsException;
+import be.mentalhealth.springboot_backend.exception.exceptions.UserAlreadyExistsException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
@@ -35,7 +37,9 @@ public class AuthenticationService implements UserDetailsService {
 
     public User register(AccountRequest accountRequest){
         //xử lý logic
-
+        if (userRepository.findByUsername(accountRequest.getUsername()).isPresent()) {
+            throw new UserAlreadyExistsException("Username already exists!");
+        }
         //lưu xuống db
 
         User user = new User();
@@ -55,48 +59,15 @@ public class AuthenticationService implements UserDetailsService {
         return authenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
     }
 
-    public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {
-        try {
-            authenticationManager.authenticate(
-                    new UsernamePasswordAuthenticationToken(
-                            authenticationRequest.getUsername().trim(),
-                            authenticationRequest.getPassword().trim()
-                    )
-            );
-        }catch (Exception e) {
-            System.err.println("Login error: " + e.getMessage());
-            e.printStackTrace(); // In ra stack trace để debug
+    public User login(String username, String password) {
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
-            if (e instanceof BadCredentialsException) {
-                throw new BadCredentialsException("Sai thông tin đăng nhập: " + e.getMessage());
-            } else if (e instanceof LockedException) {
-                throw new LockedException("Tài khoản đã bị khóa: " + e.getMessage());
-            } else if (e instanceof DisabledException) {
-                throw new DisabledException("Tài khoản đã bị vô hiệu hóa: " + e.getMessage());
-            } else if (e instanceof AccountExpiredException) {
-                throw new AccountExpiredException("Tài khoản đã hết hạn: " + e.getMessage());
-            } else if (e instanceof CredentialsExpiredException) {
-                throw new CredentialsExpiredException("Thông tin đăng nhập đã hết hạn: " + e.getMessage());
-            } else {
-                throw new AuthenticationException("Lỗi xác thực: " + e.getMessage()) {
-                };
-            }
+        if (!user.getPassword().equals(password)) {
+            throw new InvalidCredentialsException("Invalid username or password");
         }
 
-        User user = authenticationRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow();
-        String token = tokenService.generateToken(user);
-
-         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-         authenticationResponse.setEmail(user.getEmail());
-         authenticationResponse.setUserID(user.getUserID());
-         authenticationResponse.setFullName(user.getFullName());
-         authenticationResponse.setUsername(user.getUsername());
-         authenticationResponse.setRoleEnum(user.getRoleEnum());
-         authenticationResponse.setToken(token);
-
-
-         return authenticationResponse;
-
+        return user;
     }
 
     public Long getLoggedInUserId() {
