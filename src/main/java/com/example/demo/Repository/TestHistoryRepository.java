@@ -8,7 +8,7 @@ import java.util.Optional;
 
 public interface TestHistoryRepository extends JpaRepository<TestHistory, Long> {
     List<TestHistory> findByUser_UserID(Long userID);
-
     Optional<TestHistory> findByTestResult_ResultIdAndUser_UserID(Long resultId, Long userId);
 
+    long countByTestResult_Test_TestsName(String testName);
 }
