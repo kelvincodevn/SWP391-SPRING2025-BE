@@ -12,10 +12,11 @@ import lombok.*;
 public class UserDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "userdetailid")
     private Integer userDetailId;
 
     @OneToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "userid", nullable = false)
     @JsonBackReference
     private User user;
 
