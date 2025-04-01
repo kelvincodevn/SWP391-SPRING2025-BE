@@ -13,8 +13,7 @@ public class TestAnswer {
     private String answer;
     private Integer score;
 
-    @Version
-    private Integer version;
+
 
     @JsonIgnore
     @ManyToOne(cascade = CascadeType.PERSIST)
