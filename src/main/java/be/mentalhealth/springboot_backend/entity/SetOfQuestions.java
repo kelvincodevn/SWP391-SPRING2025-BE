@@ -16,7 +16,7 @@ public class SetOfQuestions {
 
     private String questionText;
     private Integer questionNumber;
-    private Integer maxScore;
+
 
     @ManyToOne(cascade = CascadeType.PERSIST) // Thêm cascade ở đây
     @JoinColumn(name = "tests_id", nullable = false) // Khóa ngoại tham chiếu tới tests
@@ -26,17 +26,15 @@ public class SetOfQuestions {
     @OneToMany(mappedBy = "question", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<TestAnswer> answers;
 
-    @Version
-    private int version;
 
-    public SetOfQuestions(long questionId, String questionText, Integer questionNumber, Integer maxScore, Tests tests, List<TestAnswer> answers, int version) {
+
+    public SetOfQuestions(long questionId, String questionText, Integer questionNumber, Tests tests, List<TestAnswer> answers) {
         this.questionId = questionId;
         this.questionText = questionText;
         this.questionNumber = questionNumber;
-        this.maxScore = maxScore;
         this.tests = tests;
         this.answers = answers;
-        this.version = version;
+
     }
 
     public SetOfQuestions() {
@@ -72,14 +70,6 @@ public class SetOfQuestions {
 
     public void setQuestionNumber(Integer questionNumber) {
         this.questionNumber = questionNumber;
-    }
-
-    public Integer getMaxScore() {
-        return maxScore;
-    }
-
-    public void setMaxScore(Integer maxScore) {
-        this.maxScore = maxScore;
     }
 
     public Tests getTests() {

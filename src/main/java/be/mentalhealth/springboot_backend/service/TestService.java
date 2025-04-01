@@ -228,7 +228,6 @@ public class TestService {
                     question.setTests(test);
                     question.setQuestionNumber(questionNumber++); // Assign new sequential number
                     question.setQuestionText(row.getQuestionText());
-                    question.setMaxScore(row.getMaxScore());
                     tempQuestions.add(question);
                     existingQuestions.put(row.getQuestionText(), question);
                 }

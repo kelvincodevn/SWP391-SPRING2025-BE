@@ -20,8 +20,6 @@ import java.util.List;
     @Column(nullable = false)
     private boolean isDeleted = false;
 
-    @Version
-    private Integer version;
 
 
     @JsonIgnore
@@ -29,12 +27,12 @@ import java.util.List;
     private List<SetOfQuestions> questions = new ArrayList<>();
 
 
-        public Tests(long id, String testsName, String testsDescription, boolean isDeleted, Integer version, List<SetOfQuestions> questions) {
+        public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
             this.id = id;
             this.testsName = testsName;
             this.testsDescription = testsDescription;
             this.isDeleted = isDeleted;
-            this.version = version;
+
             this.questions = questions;
         }
         public Tests() {

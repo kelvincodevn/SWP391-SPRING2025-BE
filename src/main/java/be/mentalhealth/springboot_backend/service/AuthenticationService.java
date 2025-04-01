@@ -59,15 +59,29 @@ public class AuthenticationService implements UserDetailsService {
         return authenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
     }
 
-    public User login(String username, String password) {
+    public AuthenticationResponse login(String username, String password) {
+        // Tìm user theo username
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
 
-        if (!user.getPassword().equals(password)) {
+        // Kiểm tra mật khẩu bằng BCrypt
+        if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new InvalidCredentialsException("Invalid username or password");
         }
 
-        return user;
+        // Tạo JWT token cho user sau khi đăng nhập thành công
+        String token = tokenService.generateToken(user);
+
+        // Tạo response object mà không dùng Builder
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        authenticationResponse.setEmail(user.getEmail());
+        authenticationResponse.setUserID(user.getUserID());
+        authenticationResponse.setFullName(user.getFullName());
+        authenticationResponse.setUsername(user.getUsername());
+        authenticationResponse.setRoleEnum(user.getRoleEnum());
+        authenticationResponse.setToken(token);
+
+        return authenticationResponse;
     }
 
     public Long getLoggedInUserId() {
