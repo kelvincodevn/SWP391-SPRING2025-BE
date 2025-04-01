@@ -11,10 +11,13 @@ import java.util.List;
 public class Tests {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id", nullable = false)
+    @Column(name = "testid", nullable = false)
     private long id;
 
+    @Column(name = "testname")
     private String testsName;
+
+    @Column(name = "testdescription")
     private String testsDescription;
 
     @Version
