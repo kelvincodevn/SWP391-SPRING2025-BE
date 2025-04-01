@@ -24,10 +24,10 @@ public class AuthenticationAPI {
         return ResponseEntity.status(HttpStatus.CREATED).body(newUser);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<AuthenticationResponse> login(@RequestParam String username, @RequestParam String password) {
-        AuthenticationResponse user = authenticationService.login(username, password);
-        return ResponseEntity.ok(user);
+    @PostMapping("login")
+    public ResponseEntity login(@RequestBody AuthenticationRequest authenticationRequest){
+        AuthenticationResponse authenticationResponse = authenticationService.login(authenticationRequest);
+        return ResponseEntity.ok(authenticationResponse);
     }
 
 

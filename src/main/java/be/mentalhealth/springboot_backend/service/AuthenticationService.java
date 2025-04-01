@@ -11,6 +11,7 @@ import be.mentalhealth.springboot_backend.entity.request.AuthenticationRequest;
 import be.mentalhealth.springboot_backend.entity.response.AuthenticationResponse;
 import be.mentalhealth.springboot_backend.exception.exceptions.InvalidCredentialsException;
 import be.mentalhealth.springboot_backend.exception.exceptions.UserAlreadyExistsException;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.*;
 import org.springframework.security.core.AuthenticationException;
@@ -20,6 +21,9 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 @Service
 public class AuthenticationService implements UserDetailsService {
@@ -34,6 +38,8 @@ public class AuthenticationService implements UserDetailsService {
     UserRepository userRepository;
     @Autowired
     TokenService tokenService;
+
+    private static final Logger log = LoggerFactory.getLogger(User.class);
 
     public User register(AccountRequest accountRequest){
         //xử lý logic
@@ -59,20 +65,45 @@ public class AuthenticationService implements UserDetailsService {
         return authenticationRepository.findByUsername(username).orElseThrow(() -> new UsernameNotFoundException("Account not found"));
     }
 
-    public AuthenticationResponse login(String username, String password) {
-        // Tìm user theo username
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new InvalidCredentialsException("Invalid username or password"));
-
-        // Kiểm tra mật khẩu bằng BCrypt
-        if (!passwordEncoder.matches(password, user.getPassword())) {
-            throw new InvalidCredentialsException("Invalid username or password");
+    public AuthenticationResponse login(AuthenticationRequest authenticationRequest) {
+        try {
+            authenticationManager.authenticate(
+                    new UsernamePasswordAuthenticationToken(
+                            authenticationRequest.getUsername().trim(),
+                            authenticationRequest.getPassword().trim()
+                    )
+            );
+        } catch (BadCredentialsException e) {
+            log.error("Authentication failed: Incorrect credentials", e);
+            throw new InvalidCredentialsException("Sai thông tin đăng nhập.");
+        } catch (LockedException e) {
+            log.error("Authentication failed: Account is locked", e);
+            throw new LockedException("Tài khoản đã bị khóa.");
+        } catch (DisabledException e) {
+            log.error("Authentication failed: Account is disabled", e);
+            throw new DisabledException("Tài khoản đã bị vô hiệu hóa.");
+        } catch (AccountExpiredException e) {
+            log.error("Authentication failed: Account has expired", e);
+            throw new AccountExpiredException("Tài khoản đã hết hạn.");
+        } catch (CredentialsExpiredException e) {
+            log.error("Authentication failed: Credentials have expired", e);
+            throw new CredentialsExpiredException("Thông tin đăng nhập đã hết hạn.");
+        } catch (AuthenticationException e) {
+            log.error("Authentication failed: Unexpected authentication error", e);
+            throw new AuthenticationException("Lỗi xác thực: " + e.getMessage()) {};
         }
 
-        // Tạo JWT token cho user sau khi đăng nhập thành công
+        // Lấy user từ DB, nếu không tìm thấy thì báo lỗi
+        User user = authenticationRepository.findByUsername(authenticationRequest.getUsername())
+                .orElseThrow(() -> {
+                    log.error("Authentication failed: User not found");
+                    return new InvalidCredentialsException("Sai thông tin đăng nhập.");
+                });
+
+        // Tạo JWT token
         String token = tokenService.generateToken(user);
 
-        // Tạo response object mà không dùng Builder
+        // Khởi tạo AuthenticationResponse
         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
         authenticationResponse.setEmail(user.getEmail());
         authenticationResponse.setUserID(user.getUserID());

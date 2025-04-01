@@ -1,6 +1,6 @@
 package be.mentalhealth.springboot_backend.api;
 
-import be.mentalhealth.springboot_backend.DTO.DashboardDTO;
+
 import be.mentalhealth.springboot_backend.service.DashboardService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
