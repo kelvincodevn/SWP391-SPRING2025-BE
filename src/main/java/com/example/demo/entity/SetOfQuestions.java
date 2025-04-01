@@ -11,7 +11,7 @@ import java.util.List;
 public class SetOfQuestions {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "question_id", nullable = false)
+    @Column(name = "questionid", nullable = false)
     private long questionId;
 
     private String questionText;

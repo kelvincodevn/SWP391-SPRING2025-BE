@@ -14,6 +14,7 @@ import java.util.List;
 public class Survey {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "survey_id")
     private Long id;
 
     private String surveyName; // Thay title thành surveyName để đồng bộ với test

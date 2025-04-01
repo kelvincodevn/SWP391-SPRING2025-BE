@@ -335,6 +335,7 @@ public class BookingService {
     }
 
     private String saveFile(MultipartFile file) {
+        //cái này cần xem lại
         return "path/to/" + file.getOriginalFilename(); // Logic lưu file cần được triển khai thực tế
     }
 

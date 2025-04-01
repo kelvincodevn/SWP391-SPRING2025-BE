@@ -1,8 +1,6 @@
 package com.example.demo.api.Manager;
 
-import com.example.demo.entity.Survey;
-import com.example.demo.entity.SurveyResponse;
-import com.example.demo.entity.User;
+import com.example.demo.entity.*;
 import com.example.demo.service.SurveyService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import lombok.RequiredArgsConstructor;
@@ -51,6 +49,42 @@ public class SurveyController {
             return ResponseEntity.ok(response);
         } catch (Exception e) {
             throw new RuntimeException("Error fetching surveys: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/{surveyId}")
+    public ResponseEntity<Map<String, Object>> getSurveyDetails(@PathVariable Long surveyId) {
+        try {
+            Survey survey = surveyService.getSurveyDetails(surveyId);
+            List<SurveyQuestion> questions = survey.getQuestions();
+
+            List<Map<String, Object>> questionList = questions.stream().map(q -> {
+                List<SurveyAnswerOption> answerOptions = q.getAnswerOptions();
+                List<Map<String, Object>> answers = answerOptions.stream()
+                        .map(a -> {
+                            Map<String, Object> answerMap = new HashMap<>();
+                            answerMap.put("answerText", a.getAnswerText());
+                            return answerMap;
+                        })
+                        .collect(Collectors.toList());
+
+                Map<String, Object> questionMap = new HashMap<>();
+                questionMap.put("questionNumber", q.getQuestionNumber());
+                questionMap.put("questionText", q.getQuestionText());
+                questionMap.put("answers", answers);
+                return questionMap;
+            }).collect(Collectors.toList());
+
+            Map<String, Object> response = new HashMap<>();
+            response.put("surveyId", survey.getId());
+            response.put("surveyName", survey.getSurveyName());
+            response.put("surveyDescription", survey.getSurveyDescription());
+            response.put("totalQuestions", questions.size());
+            response.put("questions", questionList);
+
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            throw new RuntimeException("Error fetching survey details: " + e.getMessage());
         }
     }
 

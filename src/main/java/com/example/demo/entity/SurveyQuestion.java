@@ -15,6 +15,7 @@ import java.util.List;
 public class SurveyQuestion {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "survey_question_id")
     private Long id;
 
     @ManyToOne

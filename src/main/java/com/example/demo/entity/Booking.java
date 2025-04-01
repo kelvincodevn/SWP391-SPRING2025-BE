@@ -34,6 +34,7 @@ public class Booking {
     private Double fee;
 
     @Enumerated(EnumType.STRING)
+    @Column(name = "booking_status")
     private BookingStatus status;
 
     private String medicalReportPath;

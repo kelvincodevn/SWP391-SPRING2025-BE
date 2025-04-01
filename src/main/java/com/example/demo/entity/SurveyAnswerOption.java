@@ -13,10 +13,11 @@ import lombok.*;
 public class SurveyAnswerOption {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "survey_answer_option_id")
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "question_id", nullable = false)
+    @JoinColumn(name = "survey_question_id", nullable = false)
     @JsonBackReference
     private SurveyQuestion question;
 
