@@ -2,21 +2,18 @@ package com.example.demo.model;
 
 public class ExcelRow {
     private String testName;
-    private int questionNumber; // Thêm questionNumber
+
     private String questionText;
     private String answerText;
     private int maxScore;
-    private long questionId;
-    private long resultId;
 
-    public ExcelRow(String testName, int questionNumber, String questionText, String answerText, int maxScore, long questionId, long resultId) {
+    public ExcelRow(String testName, String questionText, String answerText, int maxScore) {
         this.testName = testName;
-        this.questionNumber = questionNumber;
+
         this.questionText = questionText;
         this.answerText = answerText;
         this.maxScore = maxScore;
-        this.questionId = questionId;
-        this.resultId = resultId;
+
     }
 
     // Getters và Setters
@@ -28,13 +25,7 @@ public class ExcelRow {
         this.testName = testName;
     }
 
-    public int getQuestionNumber() { // Thêm getter cho questionNumber
-        return questionNumber;
-    }
 
-    public void setQuestionNumber(int questionNumber) { // Thêm setter cho questionNumber
-        this.questionNumber = questionNumber;
-    }
 
     public String getQuestionText() {
         return questionText;
@@ -60,21 +51,7 @@ public class ExcelRow {
         this.maxScore = maxScore;
     }
 
-    public long getQuestionId() {
-        return questionId;
-    }
 
-    public void setQuestionId(long questionId) {
-        this.questionId = questionId;
-    }
-
-    public long getResultId() {
-        return resultId;
-    }
-
-    public void setResultId(long resultId) {
-        this.resultId = resultId;
-    }
 }
 
 

@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
-    @Entity
-    @Table(name = "tests")
-    public class Tests {
+@Entity
+@Table(name = "tests")
+public class Tests {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -27,32 +27,34 @@ import java.util.List;
     private List<SetOfQuestions> questions = new ArrayList<>();
 
 
-        public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
-            this.id = id;
-            this.testsName = testsName;
-            this.testsDescription = testsDescription;
-            this.isDeleted = isDeleted;
-
-            this.questions = questions;
-        }
-        public Tests() {
+    public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
+        this.id = id;
+        this.testsName = testsName;
+        this.testsDescription = testsDescription;
+        this.isDeleted = isDeleted;
+        this.questions = questions;
+    }
+    public Tests() {
     }
 
-        public boolean isDeleted() {
-            return isDeleted;
-        }
+    public boolean isDeleted() {
+        return isDeleted;
+    }
 
-        public void setDeleted(boolean deleted) {
-            isDeleted = deleted;
-        }
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
 
-        public List<SetOfQuestions> getQuestions() {
-            return questions;
-        }
+    public List<SetOfQuestions> getQuestions() {
+        return questions;
+    }
 
-        public void setQuestions(List<SetOfQuestions> questions) {
-            this.questions = questions;
-        }
+    public void setQuestions(List<SetOfQuestions> questions) {
+        this.questions = questions;
+    }
+    public long getId() {
+        return id;
+    }
 
     public void setId(long testsId) {
         this.id = testsId;
@@ -73,5 +75,4 @@ import java.util.List;
     public void setTestsDescription(String testsDescription) {
         this.testsDescription = testsDescription;
     }
-}
 }
