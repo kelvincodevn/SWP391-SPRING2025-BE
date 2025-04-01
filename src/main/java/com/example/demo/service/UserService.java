@@ -48,7 +48,6 @@ public class UserService {
         user.setDob(updatedProfile.getDob());
         user.setPhone(updatedProfile.getPhone());
         user.setGender(updatedProfile.getGender());
-        user.setAvatar(updatedProfile.getAvatar());
         User savedUser = userRepository.save(user);
         return modelMapper.map(savedUser, UserProfileDTO.class);
     }

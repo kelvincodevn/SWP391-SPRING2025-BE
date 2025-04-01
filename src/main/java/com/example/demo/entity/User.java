@@ -41,13 +41,10 @@ public class User implements UserDetails {
 
     private LocalDateTime createdDate;
 
-    private Boolean status;
-
     private String gender;
 
-    private String avatar;
-
     @Enumerated(value = EnumType.STRING)
+    @Column(name = "role")
     private RoleEnum roleEnum;
 
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -133,28 +130,12 @@ public class User implements UserDetails {
         this.createdDate = createdDate;
     }
 
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
     public String getGender() {
         return gender;
     }
 
     public void setGender(String gender) {
         this.gender = gender;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
     }
 
     public RoleEnum getRoleEnum() {
@@ -221,13 +202,12 @@ public class User implements UserDetails {
     @PrePersist
     protected void onCreate() {
         this.createdDate = LocalDateTime.now();
-        this.status = true;
     }
 
     public User() {
     }
 
-    public User(Long userID, String username, String password, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, RoleEnum roleEnum) {
+    public User(Long userID, String username, String password, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, String gender, RoleEnum roleEnum) {
         this.userID = userID;
         this.username = username;
         this.password = password;
@@ -236,9 +216,7 @@ public class User implements UserDetails {
         this.dob = dob;
         this.phone = phone;
         this.createdDate = createdDate;
-        this.status = status;
         this.gender = gender;
-        this.avatar = avatar;
         this.roleEnum = roleEnum;
     }
 

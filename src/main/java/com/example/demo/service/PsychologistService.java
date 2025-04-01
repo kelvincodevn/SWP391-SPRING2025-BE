@@ -139,9 +139,7 @@ public class PsychologistService {
         profile.setDob(psychologist.getDob());
         profile.setPhone(psychologist.getPhone());
         profile.setCreatedDate(psychologist.getCreatedDate());
-        profile.setStatus(psychologist.getStatus());
         profile.setGender(psychologist.getGender());
-        profile.setAvatar(psychologist.getAvatar());
         profile.setMajor(userDetail.getMajor());
         profile.setDegree(userDetail.getDegree());
         profile.setWorkplace(userDetail.getWorkplace());
@@ -176,9 +174,6 @@ public class PsychologistService {
         if (profileData.getGender() != null) {
             psychologist.setGender(profileData.getGender());
         }
-        if (profileData.getAvatar() != null) {
-            psychologist.setAvatar(profileData.getAvatar());
-        }
 
         // Update fields in UserDetail entity
         if (profileData.getMajor() != null) {
@@ -205,9 +200,7 @@ public class PsychologistService {
         updatedProfile.setDob(psychologist.getDob());
         updatedProfile.setPhone(psychologist.getPhone());
         updatedProfile.setCreatedDate(psychologist.getCreatedDate());
-        updatedProfile.setStatus(psychologist.getStatus());
         updatedProfile.setGender(psychologist.getGender());
-        updatedProfile.setAvatar(psychologist.getAvatar());
         updatedProfile.setMajor(userDetail.getMajor());
         updatedProfile.setDegree(userDetail.getDegree());
         updatedProfile.setWorkplace(userDetail.getWorkplace());

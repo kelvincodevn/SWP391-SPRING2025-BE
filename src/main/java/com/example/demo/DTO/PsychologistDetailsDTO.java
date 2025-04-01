@@ -11,9 +11,7 @@ public class PsychologistDetailsDTO {
     private LocalDate dob;
     private String phone;
     private LocalDateTime createdDate;
-    private Boolean status;
     private String gender;
-    private String avatar;
     private String major;
     private String degree;
     private String workplace;
@@ -22,7 +20,7 @@ public class PsychologistDetailsDTO {
     public PsychologistDetailsDTO() {
     }
 
-    public PsychologistDetailsDTO(Long userID, String username, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, String major, String degree, String workplace, Double fee) {
+    public PsychologistDetailsDTO(Long userID, String username, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, String gender, String major, String degree, String workplace, Double fee) {
         this.userID = userID;
         this.username = username;
         this.fullName = fullName;
@@ -30,9 +28,7 @@ public class PsychologistDetailsDTO {
         this.dob = dob;
         this.phone = phone;
         this.createdDate = createdDate;
-        this.status = status;
         this.gender = gender;
-        this.avatar = avatar;
         this.major = major;
         this.degree = degree;
         this.workplace = workplace;
@@ -95,28 +91,12 @@ public class PsychologistDetailsDTO {
         this.createdDate = createdDate;
     }
 
-    public Boolean getStatus() {
-        return status;
-    }
-
-    public void setStatus(Boolean status) {
-        this.status = status;
-    }
-
     public String getGender() {
         return gender;
     }
 
     public void setGender(String gender) {
         this.gender = gender;
-    }
-
-    public String getAvatar() {
-        return avatar;
-    }
-
-    public void setAvatar(String avatar) {
-        this.avatar = avatar;
     }
 
     public String getMajor() {
