@@ -228,7 +228,7 @@ public ResponseEntity<Map<String, Object>> submitTest(UserAnswersRequestDTO subm
 }
 
 
-    @Transactional
+     @Transactional
     public ResponseEntity<String> uploadExcelFile(MultipartFile file) {
         if (file.isEmpty() || !isExcelFile(file.getOriginalFilename())) {
             return ResponseEntity.badRequest().body("Invalid file format or empty file.");
@@ -240,18 +240,42 @@ public ResponseEntity<Map<String, Object>> submitTest(UserAnswersRequestDTO subm
             Sheet sheet = workbook.getSheetAt(0);
             Iterator<Row> rowIterator = sheet.iterator();
             if (!rowIterator.hasNext()) {
-                return ResponseEntity.badRequest().body("Excel file is empty");
+                return ResponseEntity.badRequest().body("Excel file is empty.");
             }
-            rowIterator.next(); // Bỏ qua header
+            rowIterator.next(); // Skip header
 
-            // Lấy dữ liệu từ Excel
             Map<String, List<ExcelRow>> testDataMap = extractExcelData(rowIterator);
+            Set<String> testNames = testDataMap.keySet();
+            List<Tests> existingTests = testsRepository.findByTestsNameIn(testNames);
 
-            // Tối ưu truy vấn DB bằng cách preload dữ liệu cần thiết
-            processExcelData(testDataMap);
+            Map<String, Tests> activeTests = new HashMap<>();
+            Map<String, Tests> deletedTests = new HashMap<>();
 
-            return ResponseEntity.ok("File processed successfully");
+            for (Tests test : existingTests) {
+                if (test.isDeleted()) {
+                    deletedTests.put(test.getTestsName(), test);
+                } else {
+                    activeTests.put(test.getTestsName(), test);
+                }
+            }
 
+            testDataMap.keySet().removeAll(activeTests.keySet());
+            if (testDataMap.isEmpty()) {
+                return ResponseEntity.badRequest().body("All test names already exist and are active.");
+            }
+
+            for (String testName : deletedTests.keySet()) {
+                Tests deletedTest = deletedTests.get(testName);
+                deletedTest.setDeleted(false);
+                testsRepository.save(deletedTest);
+                testDataMap.remove(testName);
+            }
+
+            if (!testDataMap.isEmpty()) {
+                processExcelData(testDataMap);
+            }
+
+            return ResponseEntity.ok("File processed successfully. Restored deleted tests and added new ones.");
         } catch (IOException e) {
             return ResponseEntity.badRequest().body("Error processing Excel file: " + e.getMessage());
         }
@@ -333,12 +357,9 @@ public ResponseEntity<Map<String, Object>> submitTest(UserAnswersRequestDTO subm
             if (isEmptyRow(row)) continue;
             ExcelRow excelRow = new ExcelRow(
                     getStringValue(row.getCell(0)),  // testName
-                    getNumericValue(row.getCell(6)), // questionNumber (số thứ tự câu hỏi)
                     getStringValue(row.getCell(1)),  // questionText
                     getStringValue(row.getCell(2)),  // answerText
-                    getNumericValue(row.getCell(3)), // maxScore
-                    getNumericValue(row.getCell(4)), // questionId
-                    getNumericValue(row.getCell(5))  // resultId
+                    getNumericValue(row.getCell(3)) // maxScore
             );
             testDataMap.computeIfAbsent(excelRow.getTestName(), k -> new ArrayList<>()).add(excelRow);
         }
@@ -381,13 +402,22 @@ public ResponseEntity<Map<String, Object>> submitTest(UserAnswersRequestDTO subm
         };
     }
 
+    @Transactional
     public ResponseEntity<String> deleteTest(Long id) {
         if (!testsRepository.existsById(id)) {
-            return ResponseEntity.badRequest().body("Tests not found with ID: " + id);
+            return ResponseEntity.badRequest().body("Test not found with ID: " + id);
         }
-        testsRepository.deleteById(id);
-        return ResponseEntity.ok("Deleted test with ID: " + id);
+
+        // Retrieve the test and mark it as deleted
+        Tests test = testsRepository.findById(id).orElse(null);
+        if (test != null) {
+            test.setDeleted(true);
+            testsRepository.save(test);
+        }
+
+        return ResponseEntity.ok("Marked test as deleted with ID: " + id);
     }
+
 }
 
 
