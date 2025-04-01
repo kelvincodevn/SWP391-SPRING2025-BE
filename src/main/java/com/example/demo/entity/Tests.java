@@ -17,12 +17,16 @@ public class Tests {
     private String testsName;
     private String testsDescription;
 
-    @Version
-    private Integer version;
+    public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
+            this.id = id;
+            this.testsName = testsName;
+            this.testsDescription = testsDescription;
+            this.isDeleted = isDeleted;
 
-    public Tests(Long maxTestId, String testsName, String testsDescription) {
-        this.testsName = testsName;
-        this.testsDescription = testsDescription;
+            this.questions = questions;
+        }
+    
+    public Tests() {
     }
 
     @JsonIgnore
