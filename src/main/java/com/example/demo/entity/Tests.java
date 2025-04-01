@@ -6,9 +6,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
-@Table(name = "tests")
-public class Tests {
+    @Entity
+    @Table(name = "tests")
+    public class Tests {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
@@ -17,7 +17,17 @@ public class Tests {
     private String testsName;
     private String testsDescription;
 
-    public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
+    @Column(nullable = false)
+    private boolean isDeleted = false;
+
+
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "tests", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<SetOfQuestions> questions = new ArrayList<>();
+
+
+        public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
             this.id = id;
             this.testsName = testsName;
             this.testsDescription = testsDescription;
@@ -25,24 +35,24 @@ public class Tests {
 
             this.questions = questions;
         }
-    
-    public Tests() {
+        public Tests() {
     }
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "tests", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<SetOfQuestions> questions = new ArrayList<>();
+        public boolean isDeleted() {
+            return isDeleted;
+        }
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TestScoring> scorings = new ArrayList<>(); // Thêm relationship với TestScoring
+        public void setDeleted(boolean deleted) {
+            isDeleted = deleted;
+        }
 
-    public Tests() {
-    }
+        public List<SetOfQuestions> getQuestions() {
+            return questions;
+        }
 
-    public long getId() {
-        return id;
-    }
+        public void setQuestions(List<SetOfQuestions> questions) {
+            this.questions = questions;
+        }
 
     public void setId(long testsId) {
         this.id = testsId;
@@ -63,4 +73,5 @@ public class Tests {
     public void setTestsDescription(String testsDescription) {
         this.testsDescription = testsDescription;
     }
+}
 }
