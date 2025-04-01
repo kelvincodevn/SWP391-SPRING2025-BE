@@ -17,29 +17,41 @@ public class Tests {
     private String testsName;
     private String testsDescription;
 
-    public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
-            this.id = id;
-            this.testsName = testsName;
-            this.testsDescription = testsDescription;
-            this.isDeleted = isDeleted;
+    @Column(nullable = false)
+    private boolean isDeleted = false;
 
-            this.questions = questions;
-        }
-    
-    public Tests() {
-    }
+
 
     @JsonIgnore
     @OneToMany(mappedBy = "tests", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<SetOfQuestions> questions = new ArrayList<>();
 
-    @JsonIgnore
-    @OneToMany(mappedBy = "test", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<TestScoring> scorings = new ArrayList<>(); // Thêm relationship với TestScoring
 
+    public Tests(long id, String testsName, String testsDescription, boolean isDeleted, List<SetOfQuestions> questions) {
+        this.id = id;
+        this.testsName = testsName;
+        this.testsDescription = testsDescription;
+        this.isDeleted = isDeleted;
+        this.questions = questions;
+    }
     public Tests() {
     }
 
+    public boolean isDeleted() {
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {
+        isDeleted = deleted;
+    }
+
+    public List<SetOfQuestions> getQuestions() {
+        return questions;
+    }
+
+    public void setQuestions(List<SetOfQuestions> questions) {
+        this.questions = questions;
+    }
     public long getId() {
         return id;
     }

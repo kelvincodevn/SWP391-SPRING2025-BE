@@ -9,6 +9,7 @@ import com.example.demo.entity.request.AccountRequest;
 import com.example.demo.entity.request.AuthenticationRequest;
 import com.example.demo.entity.response.AuthenticationResponse;
 import com.example.demo.enums.RoleEnum;
+import com.example.demo.exception.exceptions.InvalidCredentialsException;
 import org.apache.tomcat.util.net.openssl.ciphers.Authentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -24,6 +25,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @Service
@@ -33,6 +36,7 @@ public class AuthenticationService implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private static final Logger log = LoggerFactory.getLogger(User.class);
 
     public AuthenticationService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
@@ -160,40 +164,46 @@ public class AuthenticationService implements UserDetailsService {
                             authenticationRequest.getPassword().trim()
                     )
             );
-        }catch (Exception e) {
-            System.err.println("Login error: " + e.getMessage());
-            e.printStackTrace(); // In ra stack trace để debug
-
-            if (e instanceof BadCredentialsException) {
-                throw new BadCredentialsException("Sai thông tin đăng nhập: " + e.getMessage());
-            } else if (e instanceof LockedException) {
-                throw new LockedException("Tài khoản đã bị khóa: " + e.getMessage());
-            } else if (e instanceof DisabledException) {
-                throw new DisabledException("Tài khoản đã bị vô hiệu hóa: " + e.getMessage());
-            } else if (e instanceof AccountExpiredException) {
-                throw new AccountExpiredException("Tài khoản đã hết hạn: " + e.getMessage());
-            } else if (e instanceof CredentialsExpiredException) {
-                throw new CredentialsExpiredException("Thông tin đăng nhập đã hết hạn: " + e.getMessage());
-            } else {
-                throw new AuthenticationException("Lỗi xác thực: " + e.getMessage()) {
-                };
-            }
+        } catch (BadCredentialsException e) {
+            log.error("Authentication failed: Incorrect credentials", e);
+            throw new InvalidCredentialsException("Sai thông tin đăng nhập.");
+        } catch (LockedException e) {
+            log.error("Authentication failed: Account is locked", e);
+            throw new LockedException("Tài khoản đã bị khóa.");
+        } catch (DisabledException e) {
+            log.error("Authentication failed: Account is disabled", e);
+            throw new DisabledException("Tài khoản đã bị vô hiệu hóa.");
+        } catch (AccountExpiredException e) {
+            log.error("Authentication failed: Account has expired", e);
+            throw new AccountExpiredException("Tài khoản đã hết hạn.");
+        } catch (CredentialsExpiredException e) {
+            log.error("Authentication failed: Credentials have expired", e);
+            throw new CredentialsExpiredException("Thông tin đăng nhập đã hết hạn.");
+        } catch (AuthenticationException e) {
+            log.error("Authentication failed: Unexpected authentication error", e);
+            throw new AuthenticationException("Lỗi xác thực: " + e.getMessage()) {};
         }
 
-        User user = authenticationRepository.findByUsername(authenticationRequest.getUsername()).orElseThrow();
+        // Lấy user từ DB, nếu không tìm thấy thì báo lỗi
+        User user = authenticationRepository.findByUsername(authenticationRequest.getUsername())
+                .orElseThrow(() -> {
+                    log.error("Authentication failed: User not found");
+                    return new InvalidCredentialsException("Sai thông tin đăng nhập.");
+                });
+
+        // Tạo JWT token
         String token = tokenService.generateToken(user);
 
-         AuthenticationResponse authenticationResponse = new AuthenticationResponse();
-         authenticationResponse.setEmail(user.getEmail());
-         authenticationResponse.setUserID(user.getUserID());
-         authenticationResponse.setFullName(user.getFullName());
-         authenticationResponse.setUsername(user.getUsername());
-         authenticationResponse.setRoleEnum(user.getRoleEnum());
-         authenticationResponse.setToken(token);
+        // Khởi tạo AuthenticationResponse
+        AuthenticationResponse authenticationResponse = new AuthenticationResponse();
+        authenticationResponse.setEmail(user.getEmail());
+        authenticationResponse.setUserID(user.getUserID());
+        authenticationResponse.setFullName(user.getFullName());
+        authenticationResponse.setUsername(user.getUsername());
+        authenticationResponse.setRoleEnum(user.getRoleEnum());
+        authenticationResponse.setToken(token);
 
-
-         return authenticationResponse;
-
+        return authenticationResponse;
     }
 
     public Long getLoggedInUserId() {
