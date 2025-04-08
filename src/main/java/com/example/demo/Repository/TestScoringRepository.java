@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface TestScoringRepository extends JpaRepository<TestScoring, Long> {
     List<TestScoring> findByTest(Tests test); // Thêm phương thức truy vấn
+    // Thêm phương thức mới
+    List<TestScoring> findByTest_Id(Long testId);
 }

@@ -2,6 +2,8 @@ package com.example.demo.api.Psychologist;
 
 import com.example.demo.DTO.BookingRequest;
 import com.example.demo.DTO.BookingResponse;
+import com.example.demo.DTO.UserDTO;
+import com.example.demo.entity.User;
 import com.example.demo.service.BookingService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/bookings")
@@ -30,6 +33,13 @@ public class UserBookingAPI {
     public ResponseEntity<String> cancelBooking(@RequestParam Long userId, @PathVariable Integer bookingId) {
         bookingService.cancelBooking(userId, bookingId);
         return ResponseEntity.ok("Booking cancelled successfully");
+    }
+
+    @PostMapping("/{bookingId}/confirm")
+    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
+    public ResponseEntity<String> confirmBooking(@RequestParam Long userId, @PathVariable Integer bookingId) {
+        bookingService.confirmBooking(userId, bookingId);
+        return ResponseEntity.ok("Booking confirmed successfully");
     }
 
     // Thêm API để lấy danh sách booking của user
@@ -57,11 +67,21 @@ public class UserBookingAPI {
         return ResponseEntity.ok(bookings);
     }
 
-    @PostMapping("/{bookingId}/confirm")
+//    @PostMapping("/{bookingId}/confirm")
+//    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
+//    public ResponseEntity<String> confirmBooking(@RequestParam Long userId, @PathVariable Integer bookingId) {
+//        bookingService.confirmBooking(userId, bookingId);
+//        return ResponseEntity.ok("Booking confirmed successfully");
+//    }
+
+    @GetMapping("/recommend-psychologists")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
-    public ResponseEntity<String> confirmBooking(@RequestParam Long userId, @PathVariable Integer bookingId) {
-        bookingService.confirmBooking(userId, bookingId);
-        return ResponseEntity.ok("Booking confirmed successfully");
+    public ResponseEntity<List<UserDTO>> recommendPsychologists(@RequestParam Long userId) {
+        List<User> psychologists = bookingService.recommendPsychologists(userId);
+        List<UserDTO> dtos = psychologists.stream()
+                .map(user -> new UserDTO(user.getUserID(), user.getFullName(), user.getEmail(), user.getUserDetail().getMajor()))
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }
 

@@ -230,14 +230,11 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.BookingRequest;
 import com.example.demo.DTO.BookingResponse;
-import com.example.demo.Repository.BookingRepository;
-import com.example.demo.Repository.SlotRepository;
-import com.example.demo.Repository.UserRepository;
-import com.example.demo.entity.Booking;
-import com.example.demo.entity.Slot;
-import com.example.demo.entity.User;
+import com.example.demo.Repository.*;
+import com.example.demo.entity.*;
 import com.example.demo.enums.AvailabilityStatus;
 import com.example.demo.enums.BookingStatus;
+import com.example.demo.enums.RoleEnum;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
@@ -264,6 +261,13 @@ public class BookingService {
 
     @Autowired
     EmailBookingService emailBookingService;
+
+    @Autowired
+    TestScoringRepository testScoringRepository;
+
+    @Autowired
+    TestResultRepository testResultRepository;
+
 
     public BookingResponse createBooking(Long userId, BookingRequest request) {
         User customer = userRepository.findById(userId)
@@ -393,7 +397,6 @@ public class BookingService {
         LocalDate currentDate = LocalDate.now();
         LocalTime currentTime = LocalTime.now();
 
-        // Kiểm tra thời gian slot
         if (!currentDate.equals(slot.getAvailableDate()) ||
                 currentTime.isBefore(slot.getStartTime()) ||
                 currentTime.isAfter(slot.getEndTime())) {
@@ -403,19 +406,18 @@ public class BookingService {
         String filePath = saveFile(report);
         booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
         booking.setMedicalReportPath(filePath);
-        booking.setConfirmationDeadline(LocalDateTime.now().plusHours(24)); // Hết hạn sau 24 giờ
+        booking.setConfirmationDeadline(LocalDateTime.now().plusMinutes(30)); // Sửa thành 30 phút
         bookingRepository.save(booking);
 
-        // Gửi email yêu cầu xác nhận
         emailBookingService.sendEmailWithAttachment(
                 booking.getEmail(),
                 "Booking Awaiting Your Confirmation",
-                "Dear " + booking.getFullName() + ",\n\nYour consultation is complete. Please confirm within 24 hours. Report attached.",
+                "Dear " + booking.getFullName() + ",\n\nYour consultation is complete. Please confirm within 30 minutes. Report attached.",
                 report
         );
     }
 
-    @Scheduled(fixedRate = 3600000) // Chạy mỗi giờ
+    @Scheduled(fixedRate = 60000) // Chạy mỗi phút
     @Transactional
     public void autoCompleteBookings() {
         List<Booking> awaitingBookings = bookingRepository.findByStatus(BookingStatus.AWAITING_CONFIRMATION);
@@ -429,7 +431,7 @@ public class BookingService {
                 emailBookingService.sendEmail(
                         booking.getEmail(),
                         "Booking Auto-Completed",
-                        "Dear " + booking.getFullName() + ",\n\nYour booking has been automatically completed due to no confirmation."
+                        "Dear " + booking.getFullName() + ",\n\nYour booking has been automatically completed due to no confirmation within 30 minutes."
                 );
             }
         }
@@ -463,7 +465,7 @@ public class BookingService {
         if (!booking.getUser().getUserID().equals(userId)) {
             throw new RuntimeException("Unauthorized to cancel this booking");
         }
-        if (booking.getStatus() == BookingStatus.PAID || booking.getStatus() == BookingStatus.COMPLETED) {
+        if (booking.getStatus() != BookingStatus.PENDING) { // Chỉ cho phép hủy khi PENDING
             throw new RuntimeException("Cannot cancel a paid or completed booking");
         }
         Slot slot = booking.getSlot();
@@ -484,6 +486,65 @@ public class BookingService {
                 "Booking Cancelled",
                 "The booking for your slot on " + slot.getAvailableDate() + " has been cancelled."
         );
+    }
+
+    @Scheduled(fixedRate = 60000) // Chạy mỗi phút
+    @Transactional
+    public void autoCancelUnpaidBookings() {
+        List<Booking> pendingBookings = bookingRepository.findByStatus(BookingStatus.PENDING);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Booking booking : pendingBookings) {
+            LocalDateTime createdAt = booking.getCreatedAt(); // Giả sử Booking có field createdAt
+            if (createdAt != null && now.isAfter(createdAt.plusMinutes(10))) { // Quá 10 phút
+                booking.setStatus(BookingStatus.CANCELLED);
+                Slot slot = booking.getSlot();
+                if (slot != null) {
+                    slot.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+                    slotRepository.save(slot);
+                }
+                bookingRepository.save(booking);
+
+                // Gửi email thông báo
+                emailBookingService.sendEmail(
+                        booking.getEmail(),
+                        "Booking Cancelled Due to Non-Payment",
+                        "Dear " + booking.getFullName() + ",\n\nYour booking on " + slot.getAvailableDate() + " at " + slot.getStartTime() + " has been cancelled due to non-payment within 10 minutes."
+                );
+                emailBookingService.sendEmail(
+                        slot.getUser().getEmail(),
+                        "Booking Cancelled Due to Non-Payment",
+                        "The booking for your slot on " + slot.getAvailableDate() + " at " + slot.getStartTime() + " has been cancelled due to non-payment."
+                );
+            }
+        }
+    }
+
+    @Scheduled(fixedRate = 60000) // Chạy mỗi phút
+    @Transactional
+    public void autoCompleteOverdueBookings() {
+        List<Booking> paidBookings = bookingRepository.findByStatus(BookingStatus.PAID);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Booking booking : paidBookings) {
+            Slot slot = booking.getSlot();
+            LocalDate slotDate = slot.getAvailableDate();
+            LocalTime slotEndTime = slot.getEndTime();
+            LocalDateTime slotEndDateTime = LocalDateTime.of(slotDate, slotEndTime);
+
+            if (now.isAfter(slotEndDateTime)) { // Slot đã kết thúc
+                booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
+                booking.setConfirmationDeadline(LocalDateTime.now().plusMinutes(30)); // 30 phút để student xác nhận
+                bookingRepository.save(booking);
+
+                // Gửi email thông báo cho student
+                emailBookingService.sendEmail(
+                        booking.getEmail(),
+                        "Booking Awaiting Your Confirmation",
+                        "Dear " + booking.getFullName() + ",\n\nYour consultation on " + slot.getAvailableDate() + " at " + slot.getStartTime() + " has ended. Please confirm within 30 minutes."
+                );
+            }
+        }
     }
 
     public List<BookingResponse> getUserBookings(Long userId) {
@@ -576,5 +637,37 @@ public class BookingService {
     private Booking getBookingOrThrow(Integer bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
+    }
+
+    public List<User> recommendPsychologists(Long userId) {
+        // Lấy kết quả test gần nhất của user
+        TestResult latestTestResult = testResultRepository.findTopByUser_UserIDOrderByCreateAtDesc(userId)
+                .orElseThrow(() -> new RuntimeException("No test result found for user"));
+
+        String testLevel = determineTestLevel(latestTestResult.getTotalScore(), latestTestResult.getTest().getId());
+
+        // Gợi ý psychologist dựa trên mức độ
+        List<User> psychologists = userRepository.findByRoleEnumAndIsDeletedFalse(RoleEnum.PSYCHOLOGIST);
+        return psychologists.stream()
+                .filter(p -> isSuitablePsychologist(p.getUserDetail().getMajor(), testLevel))
+                .collect(Collectors.toList());
+    }
+
+    private String determineTestLevel(int score, Long testId) {
+        List<TestScoring> scorings = testScoringRepository.findByTest_Id(testId);
+        for (TestScoring scoring : scorings) {
+            if (score >= scoring.getMinScore() && (scoring.getMaxScore() == null || score <= scoring.getMaxScore())) {
+                return scoring.getLevel(); // Ví dụ: "Mild", "Moderate", "Severe"
+            }
+        }
+        return "Unknown";
+    }
+
+    private boolean isSuitablePsychologist(String major, String testLevel) {
+        // Logic đơn giản: Gán chuyên môn với mức độ
+        if ("Minimal Anxiety".equals(testLevel) && major.contains("Clinical Psychology")) return true;
+        if ("Mild Anxiety".equals(testLevel) && major.contains("Clinical Psychology")) return true;
+        if ("Moderate Anxiety".equals(testLevel) && major.contains("Clinical Psychology")) return true;
+        return false;
     }
 }
