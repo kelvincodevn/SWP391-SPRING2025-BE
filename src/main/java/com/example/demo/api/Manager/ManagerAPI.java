@@ -43,6 +43,12 @@ public class ManagerAPI {
         return ResponseEntity.ok(managerService.deleteUser(id));
     }
 
+    // Thêm endpoint mới để xóa psychologist
+    @DeleteMapping("/psychologists/{id}")
+    public ResponseEntity<User> deletePsychologist(@PathVariable Long id) {
+        return ResponseEntity.ok(managerService.deletePsychologist(id));
+    }
+
     // Thêm endpoint mới để xem chi tiết psychologist
     @GetMapping("/{id}/details")
     public ResponseEntity<PsychologistDetailsDTO> getPsychologistDetails(@PathVariable Long id) {

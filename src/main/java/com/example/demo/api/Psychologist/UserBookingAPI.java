@@ -56,6 +56,13 @@ public class UserBookingAPI {
         List<BookingResponse> bookings = bookingService.getPsychologistBookings(psychologistId);
         return ResponseEntity.ok(bookings);
     }
+
+    @PostMapping("/{bookingId}/confirm")
+    @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
+    public ResponseEntity<String> confirmBooking(@RequestParam Long userId, @PathVariable Integer bookingId) {
+        bookingService.confirmBooking(userId, bookingId);
+        return ResponseEntity.ok("Booking confirmed successfully");
+    }
 }
 
 

@@ -53,14 +53,12 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private UserDetail userDetail;
 
-    // Mối quan hệ với ParentStudent (phụ huynh quản lý học sinh)
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore // Ngắt vòng lặp
+    @JsonIgnore
     private List<ParentStudent> managedStudents = new ArrayList<>();
 
-    // Mối quan hệ với ParentStudent (học sinh được quản lý bởi phụ huynh)
     @OneToMany(mappedBy = "student", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore // Ngắt vòng lặp
+    @JsonIgnore
     private List<ParentStudent> managedByParents = new ArrayList<>();
 
     @Transient
@@ -191,6 +189,14 @@ public class User implements UserDetails {
 
     public void setAuthorities(List<GrantedAuthority> authorities) {
         this.authorities = authorities;
+    }
+
+    public boolean isDeleted() {  // Thêm getter cho isDeleted
+        return isDeleted;
+    }
+
+    public void setDeleted(boolean deleted) {  // Thêm setter nếu cần
+        isDeleted = deleted;
     }
 
     @Override

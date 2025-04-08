@@ -23,6 +23,8 @@ public interface BookingRepository extends JpaRepository<Booking, Integer> {
     List<Booking> findByUser(User user);
     List<Booking> findBySlotIn(List<Slot> slots);
 
+    List<Booking> findBySlot(Slot slot); // Thêm phương thức này
+
     List<Booking> findByUser_UserID(Long userID);
 
 //    List<Booking> findByPsychologistSlot_Psychologist_UserID(Long psychologistId);

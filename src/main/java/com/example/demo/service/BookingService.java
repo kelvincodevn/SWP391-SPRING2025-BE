@@ -238,10 +238,15 @@ import com.example.demo.entity.Slot;
 import com.example.demo.entity.User;
 import com.example.demo.enums.AvailabilityStatus;
 import com.example.demo.enums.BookingStatus;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -301,6 +306,68 @@ public class BookingService {
         return new BookingResponse(booking.getId(), "PENDING", "Booking request created successfully");
     }
 
+//    public void completeBooking(Integer bookingId, MultipartFile report) {
+//        Booking booking = getBookingOrThrow(bookingId);
+//        if (booking.getStatus() != BookingStatus.PAID) {
+//            throw new RuntimeException("Can only complete PAID bookings");
+//        }
+//
+//        Slot slot = booking.getSlot();
+//        LocalDate currentDate = LocalDate.now();
+//        LocalTime currentTime = LocalTime.now();
+//
+//        // Kiểm tra xem thời gian hiện tại có nằm trong slot không
+//        if (!currentDate.equals(slot.getAvailableDate()) ||
+//                currentTime.isBefore(slot.getStartTime()) ||
+//                currentTime.isAfter(slot.getEndTime())) {
+//            throw new RuntimeException("Booking can only be completed during the scheduled slot time");
+//        }
+//
+//        String filePath = saveFile(report);
+//        booking.setStatus(BookingStatus.COMPLETED);
+//        booking.setMedicalReportPath(filePath);
+//        bookingRepository.save(booking);
+//
+//        emailBookingService.sendEmailWithAttachment(
+//                booking.getEmail(),
+//                "Booking Completed - Report",
+//                "Dear " + booking.getFullName() + ",\n\nYour consultation report is attached.",
+//                report
+//        );
+//    }
+
+//    public void completeBooking(Integer bookingId, MultipartFile report) {
+//        Booking booking = getBookingOrThrow(bookingId);
+//        if (booking.getStatus() != BookingStatus.PAID) {
+//            throw new RuntimeException("Can only complete PAID bookings");
+//        }
+//
+//        Slot slot = booking.getSlot();
+//        LocalDate currentDate = LocalDate.now();
+//        LocalTime currentTime = LocalTime.now();
+//
+//        // Kiểm tra thời gian slot
+//        if (!currentDate.equals(slot.getAvailableDate()) ||
+//                currentTime.isBefore(slot.getStartTime()) ||
+//                currentTime.isAfter(slot.getEndTime())) {
+//            throw new RuntimeException("Booking can only be completed during the scheduled slot time");
+//        }
+//
+//        String filePath = saveFile(report);
+//        booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
+//        booking.setMedicalReportPath(filePath);
+//        booking.setConfirmationDeadline(LocalDateTime.now().plusHours(24)); // Hết hạn sau 24 giờ
+//        bookingRepository.save(booking);
+//
+//        // Gửi email yêu cầu xác nhận
+//        emailBookingService.sendEmailWithAttachment(
+//                booking.getEmail(),
+//                "Booking Awaiting Your Confirmation",
+//                "Dear " + booking.getFullName() + ",\n\nYour consultation is complete. Please confirm within 24 hours. Report attached.",
+//                report
+//        );
+//    }
+
     public void payBooking(Integer bookingId) {
         Booking booking = getBookingOrThrow(bookingId);
         if (booking.getStatus() != BookingStatus.PENDING) {
@@ -321,16 +388,69 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.PAID) {
             throw new RuntimeException("Can only complete PAID bookings");
         }
+
+        Slot slot = booking.getSlot();
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
+
+        // Kiểm tra thời gian slot
+        if (!currentDate.equals(slot.getAvailableDate()) ||
+                currentTime.isBefore(slot.getStartTime()) ||
+                currentTime.isAfter(slot.getEndTime())) {
+            throw new RuntimeException("Booking can only be completed during the scheduled slot time");
+        }
+
         String filePath = saveFile(report);
-        booking.setStatus(BookingStatus.COMPLETED);
+        booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
         booking.setMedicalReportPath(filePath);
+        booking.setConfirmationDeadline(LocalDateTime.now().plusHours(24)); // Hết hạn sau 24 giờ
         bookingRepository.save(booking);
 
+        // Gửi email yêu cầu xác nhận
         emailBookingService.sendEmailWithAttachment(
                 booking.getEmail(),
-                "Booking Completed - Report",
-                "Dear " + booking.getFullName() + ",\n\nYour consultation report is attached.",
+                "Booking Awaiting Your Confirmation",
+                "Dear " + booking.getFullName() + ",\n\nYour consultation is complete. Please confirm within 24 hours. Report attached.",
                 report
+        );
+    }
+
+    @Scheduled(fixedRate = 3600000) // Chạy mỗi giờ
+    @Transactional
+    public void autoCompleteBookings() {
+        List<Booking> awaitingBookings = bookingRepository.findByStatus(BookingStatus.AWAITING_CONFIRMATION);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Booking booking : awaitingBookings) {
+            if (booking.getConfirmationDeadline() != null && now.isAfter(booking.getConfirmationDeadline())) {
+                booking.setStatus(BookingStatus.COMPLETED);
+                bookingRepository.save(booking);
+
+                emailBookingService.sendEmail(
+                        booking.getEmail(),
+                        "Booking Auto-Completed",
+                        "Dear " + booking.getFullName() + ",\n\nYour booking has been automatically completed due to no confirmation."
+                );
+            }
+        }
+    }
+
+    public void confirmBooking(Long userId, Integer bookingId) {
+        Booking booking = getBookingOrThrow(bookingId);
+        if (!booking.getUser().getUserID().equals(userId)) {
+            throw new RuntimeException("Unauthorized to confirm this booking");
+        }
+        if (booking.getStatus() != BookingStatus.AWAITING_CONFIRMATION) {
+            throw new RuntimeException("Booking is not awaiting confirmation");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        bookingRepository.save(booking);
+
+        emailBookingService.sendEmail(
+                booking.getEmail(),
+                "Booking Confirmed",
+                "Dear " + booking.getFullName() + ",\n\nYour booking has been successfully confirmed."
         );
     }
 

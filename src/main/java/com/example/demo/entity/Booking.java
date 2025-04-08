@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "bookings")
@@ -20,7 +21,7 @@ public class Booking {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @OneToOne
+    @ManyToOne // Thay đổi từ @OneToOne thành @ManyToOne
     @JoinColumn(name = "slot_id", nullable = false)
     private Slot slot;
 
@@ -37,6 +38,7 @@ public class Booking {
     private BookingStatus status;
 
     private String medicalReportPath;
+    private LocalDateTime confirmationDeadline; // Thời gian hết hạn xác nhận
 
     // Constructor không tham số
     public Booking() {
@@ -151,5 +153,14 @@ public class Booking {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    // Getter và Setter
+    public LocalDateTime getConfirmationDeadline() {
+        return confirmationDeadline;
+    }
+
+    public void setConfirmationDeadline(LocalDateTime confirmationDeadline) {
+        this.confirmationDeadline = confirmationDeadline;
     }
 }
