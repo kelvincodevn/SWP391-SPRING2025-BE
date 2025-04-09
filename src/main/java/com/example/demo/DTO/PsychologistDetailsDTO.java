@@ -18,11 +18,12 @@ public class PsychologistDetailsDTO {
     private String degree;
     private String workplace;
     private Double fee; // Thêm field fee
+    private Integer experience; // Thêm field experience
 
     public PsychologistDetailsDTO() {
     }
 
-    public PsychologistDetailsDTO(Long userID, String username, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, String major, String degree, String workplace, Double fee) {
+    public PsychologistDetailsDTO(Long userID, String username, String fullName, String email, LocalDate dob, String phone, LocalDateTime createdDate, Boolean status, String gender, String avatar, String major, String degree, String workplace, Double fee, Integer experience) {
         this.userID = userID;
         this.username = username;
         this.fullName = fullName;
@@ -37,6 +38,7 @@ public class PsychologistDetailsDTO {
         this.degree = degree;
         this.workplace = workplace;
         this.fee = fee;
+        this.experience = experience;
     }
 
     public Long getUserID() {
@@ -149,5 +151,13 @@ public class PsychologistDetailsDTO {
 
     public void setFee(Double fee) {
         this.fee = fee;
+    }
+
+    public Integer getExperience() {
+        return experience;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
     }
 }

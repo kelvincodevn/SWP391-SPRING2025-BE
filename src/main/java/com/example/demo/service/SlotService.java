@@ -53,6 +53,20 @@ public class SlotService {
             throw new IllegalArgumentException("Slot duration cannot exceed 2 hours");
         }
 
+        // Kiểm tra trùng lặp hoặc chồng lấn thời gian
+        List<Slot> existingSlots = slotRepository.findByUserUserIDAndAvailableDate(psychologistId, date);
+        for (Slot existingSlot : existingSlots) {
+            LocalTime existingStart = existingSlot.getStartTime();
+            LocalTime existingEnd = existingSlot.getEndTime();
+
+            // Kiểm tra xem slot mới có chồng lấn với slot hiện có hay không
+            // Slot mới không được bắt đầu hoặc kết thúc trong khoảng thời gian của slot hiện có
+            // Và slot hiện có không được bắt đầu hoặc kết thúc trong khoảng thời gian của slot mới
+            if (!(endTime.isBefore(existingStart) || startTime.isAfter(existingEnd))) {
+                throw new RuntimeException("Slot overlaps with an existing slot on " + date + " from " + existingStart + " to " + existingEnd);
+            }
+        }
+
         // Tạo slot
         Slot slot = Slot.builder()
                 .user(psychologist)
@@ -101,6 +115,20 @@ public class SlotService {
         Duration duration = Duration.between(startTime, endTime);
         if (duration.toMinutes() > 120) {
             throw new IllegalArgumentException("Slot duration cannot exceed 2 hours");
+        }
+
+        // Kiểm tra trùng lặp hoặc chồng lấn thời gian (ngoại trừ chính slot đang được cập nhật)
+        List<Slot> existingSlots = slotRepository.findByUserUserIDAndAvailableDate(psychologistId, date);
+        for (Slot existingSlot : existingSlots) {
+            if (existingSlot.getSlotId().equals(slotId)) {
+                continue; // Bỏ qua chính slot đang được cập nhật
+            }
+            LocalTime existingStart = existingSlot.getStartTime();
+            LocalTime existingEnd = existingSlot.getEndTime();
+
+            if (!(endTime.isBefore(existingStart) || startTime.isAfter(existingEnd))) {
+                throw new RuntimeException("Updated slot overlaps with an existing slot on " + date + " from " + existingStart + " to " + existingEnd);
+            }
         }
 
         // Cập nhật slot

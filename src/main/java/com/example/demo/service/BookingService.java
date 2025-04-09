@@ -230,6 +230,7 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.BookingRequest;
 import com.example.demo.DTO.BookingResponse;
+import com.example.demo.DTO.PsychologistDTO;
 import com.example.demo.Repository.*;
 import com.example.demo.entity.*;
 import com.example.demo.enums.AvailabilityStatus;
@@ -639,17 +640,39 @@ public class BookingService {
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
     }
 
-    public List<User> recommendPsychologists(Long userId) {
-        // Lấy kết quả test gần nhất của user
+    public List<PsychologistDTO> recommendPsychologists(Long userId) {
         TestResult latestTestResult = testResultRepository.findTopByUser_UserIDOrderByCreateAtDesc(userId)
                 .orElseThrow(() -> new RuntimeException("No test result found for user"));
 
         String testLevel = determineTestLevel(latestTestResult.getTotalScore(), latestTestResult.getTest().getId());
+        String normalizedLevel = testLevel.toLowerCase();
 
-        // Gợi ý psychologist dựa trên mức độ
         List<User> psychologists = userRepository.findByRoleEnumAndIsDeletedFalse(RoleEnum.PSYCHOLOGIST);
         return psychologists.stream()
-                .filter(p -> isSuitablePsychologist(p.getUserDetail().getMajor(), testLevel))
+                .filter(p -> p.getUserDetail() != null && isSuitablePsychologist(p.getUserDetail(), normalizedLevel))
+                .map(p -> {
+                    PsychologistDTO dto = new PsychologistDTO();
+                    dto.setUserId(p.getUserID());
+                    dto.setFullName(p.getFullName());
+                    dto.setEmail(p.getEmail());
+                    dto.setDob(p.getDob());
+                    dto.setPhone(p.getPhone());
+                    dto.setGender(p.getGender());
+                    dto.setAvatar(p.getAvatar());
+                    dto.setMajor(p.getUserDetail().getMajor());
+                    dto.setWorkplace(p.getUserDetail().getWorkplace());
+                    dto.setDegree(p.getUserDetail().getDegree());
+                    dto.setFee(p.getUserDetail().getFee());
+                    dto.setExperience(p.getUserDetail().getExperience());
+                    return dto;
+                })
+                .collect(Collectors.toMap(
+                        PsychologistDTO::getUserId,
+                        dto -> dto,
+                        (dto1, dto2) -> dto1
+                ))
+                .values()
+                .stream()
                 .collect(Collectors.toList());
     }
 
@@ -657,17 +680,29 @@ public class BookingService {
         List<TestScoring> scorings = testScoringRepository.findByTest_Id(testId);
         for (TestScoring scoring : scorings) {
             if (score >= scoring.getMinScore() && (scoring.getMaxScore() == null || score <= scoring.getMaxScore())) {
-                return scoring.getLevel(); // Ví dụ: "Mild", "Moderate", "Severe"
+                return scoring.getLevel();
             }
         }
         return "Unknown";
     }
 
-    private boolean isSuitablePsychologist(String major, String testLevel) {
-        // Logic đơn giản: Gán chuyên môn với mức độ
-        if ("Minimal Anxiety".equals(testLevel) && major.contains("Clinical Psychology")) return true;
-        if ("Mild Anxiety".equals(testLevel) && major.contains("Clinical Psychology")) return true;
-        if ("Moderate Anxiety".equals(testLevel) && major.contains("Clinical Psychology")) return true;
+    private boolean isSuitablePsychologist(UserDetail userDetail, String testLevel) {
+        Integer experience = userDetail.getExperience();
+        if (experience == null) {
+            return false;
+        }
+
+        if (testLevel.contains("non-minimal")) {
+            return experience >= 1 && experience <= 2;
+        } else if (testLevel.contains("minimal")) {
+            return experience >= 3 && experience <= 4;
+        } else if (testLevel.contains("mild")) {
+            return experience >= 4 && experience <= 5;
+        } else if (testLevel.contains("moderate")) {
+            return experience >= 6 && experience <= 7;
+        } else if (testLevel.contains("severe")) {
+            return experience >= 8 && experience <= 9;
+        }
         return false;
     }
 }

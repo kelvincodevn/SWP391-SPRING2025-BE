@@ -1,24 +1,31 @@
 package com.example.demo.DTO;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-import lombok.Data;
-
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
-@Data
 public class PsychologistDTO {
-    private String userName;
+    private Long userId;
     private String fullName;
-    private String password;
+    private String email;
+    private LocalDate dob;
+    private String phone;
+    private String gender;
+    private String avatar;
+    private String major;
+    private String workplace;
+    private String degree;
+    private Double fee;
+    private Integer experience;
 
+    // Constructor
+    public PsychologistDTO() {}
 
-    public String getUserName() {
-        return userName;
+    // Getters and Setters
+    public Long getUserId() {
+        return userId;
     }
 
-    public void setUserName(String userName) {
-        this.userName = userName;
+    public void setUserId(Long userId) {
+        this.userId = userId;
     }
 
     public String getFullName() {
@@ -29,14 +36,6 @@ public class PsychologistDTO {
         this.fullName = fullName;
     }
 
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
-
     public String getEmail() {
         return email;
     }
@@ -45,20 +44,20 @@ public class PsychologistDTO {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
-    }
-
-    public void setPhone(String phone) {
-        this.phone = phone;
-    }
-
     public LocalDate getDob() {
         return dob;
     }
 
     public void setDob(LocalDate dob) {
         this.dob = dob;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
     }
 
     public String getGender() {
@@ -77,40 +76,43 @@ public class PsychologistDTO {
         this.avatar = avatar;
     }
 
-    public Float getServiceFee() {
-        return serviceFee;
+    public String getMajor() {
+        return major;
     }
 
-    public void setServiceFee(Float serviceFee) {
-        this.serviceFee = serviceFee;
+    public void setMajor(String major) {
+        this.major = major;
     }
 
-    public LocalDateTime getCreatedDate() {
-        return createdDate;
+    public String getWorkplace() {
+        return workplace;
     }
 
-    public void setCreatedDate(LocalDateTime createdDate) {
-        this.createdDate = createdDate;
+    public void setWorkplace(String workplace) {
+        this.workplace = workplace;
     }
 
-    public PsychologistDetailDTO getPsychologistDetail() {
-        return psychologistDetail;
+    public String getDegree() {
+        return degree;
     }
 
-    public void setPsychologistDetail(PsychologistDetailDTO psychologistDetail) {
-        this.psychologistDetail = psychologistDetail;
+    public void setDegree(String degree) {
+        this.degree = degree;
     }
 
-    private String email;
+    public Double getFee() {
+        return fee;
+    }
 
-    private String phone;
-    @JsonFormat(pattern = "dd-MM-yyyy")
-    private LocalDate dob;
-    private String gender;
-    private String avatar;
-    private Float serviceFee;
-    private LocalDateTime createdDate;
+    public void setFee(Double fee) {
+        this.fee = fee;
+    }
 
-    private PsychologistDetailDTO psychologistDetail;
+    public Integer getExperience() {
+        return experience;
+    }
+
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
 }
-

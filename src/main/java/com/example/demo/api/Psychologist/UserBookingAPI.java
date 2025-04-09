@@ -2,6 +2,7 @@ package com.example.demo.api.Psychologist;
 
 import com.example.demo.DTO.BookingRequest;
 import com.example.demo.DTO.BookingResponse;
+import com.example.demo.DTO.PsychologistDTO;
 import com.example.demo.DTO.UserDTO;
 import com.example.demo.entity.User;
 import com.example.demo.service.BookingService;
@@ -76,12 +77,9 @@ public class UserBookingAPI {
 
     @GetMapping("/recommend-psychologists")
     @PreAuthorize("hasAnyAuthority('STUDENT', 'PARENT')")
-    public ResponseEntity<List<UserDTO>> recommendPsychologists(@RequestParam Long userId) {
-        List<User> psychologists = bookingService.recommendPsychologists(userId);
-        List<UserDTO> dtos = psychologists.stream()
-                .map(user -> new UserDTO(user.getUserID(), user.getFullName(), user.getEmail(), user.getUserDetail().getMajor()))
-                .collect(Collectors.toList());
-        return ResponseEntity.ok(dtos);
+    public ResponseEntity<List<PsychologistDTO>> recommendPsychologists(@RequestParam Long userId) {
+        List<PsychologistDTO> psychologists = bookingService.recommendPsychologists(userId);
+        return ResponseEntity.ok(psychologists);
     }
 }
 

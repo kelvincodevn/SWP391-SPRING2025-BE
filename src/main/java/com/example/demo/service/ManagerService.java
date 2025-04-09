@@ -177,7 +177,8 @@ public class ManagerService {
                 userDetail.getMajor(),
                 userDetail.getDegree(),
                 userDetail.getWorkplace(),
-                userDetail.getFee() // Thêm fee vào DTO
+                userDetail.getFee(), // Thêm fee vào DTO
+                userDetail.getExperience()
         );
     }
 }
