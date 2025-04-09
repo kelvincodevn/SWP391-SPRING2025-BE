@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 
 public class UserDTO {
 
+    private Long userId; // Thêm userId để lưu ID của user
     private String username;
     private String password;
     private String fullName;
@@ -13,10 +14,19 @@ public class UserDTO {
     private String phone;
     private String gender;
     private String avatar;
-
+    private String major; // Thêm major để lưu chuyên môn của psychologist
 
     // Getters và Setters
 
+
+    // Getters và Setters
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
     public String getUserName() {
         return username;
@@ -82,6 +92,14 @@ public class UserDTO {
         this.avatar = avatar;
     }
 
+    public String getMajor() {
+        return major;
+    }
+
+    public void setMajor(String major) {
+        this.major = major;
+    }
+
     public UserDTO() {
     }
 
@@ -94,5 +112,13 @@ public class UserDTO {
         this.phone = phone;
         this.gender = gender;
         this.avatar = avatar;
+    }
+
+    // Constructor mới cho recommendPsychologists
+    public UserDTO(Long userId, String fullName, String email, String major) {
+        this.userId = userId;
+        this.fullName = fullName;
+        this.email = email;
+        this.major = major;
     }
 }

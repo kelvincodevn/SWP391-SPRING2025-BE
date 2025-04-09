@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -34,11 +35,39 @@ public class SlotService {
                 .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST && !u.isDeleted)
                 .orElseThrow(() -> new RuntimeException("Psychologist not found"));
 
+        // Kiểm tra thời gian slot không nằm trong quá khứ
+        LocalDateTime slotStartDateTime = LocalDateTime.of(date, startTime);
+        LocalDateTime now = LocalDateTime.now();
+        if (slotStartDateTime.isBefore(now)) {
+            throw new RuntimeException("Cannot create a slot in the past");
+        }
+
+        // Kiểm tra thời gian bắt đầu phải trước thời gian kết thúc
+        if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
+            throw new RuntimeException("Start time must be before end time");
+        }
+
+        // Kiểm tra thời gian slot không vượt quá 2 giờ
         Duration duration = Duration.between(startTime, endTime);
         if (duration.toMinutes() > 120) {
             throw new IllegalArgumentException("Slot duration cannot exceed 2 hours");
         }
 
+        // Kiểm tra trùng lặp hoặc chồng lấn thời gian
+        List<Slot> existingSlots = slotRepository.findByUserUserIDAndAvailableDate(psychologistId, date);
+        for (Slot existingSlot : existingSlots) {
+            LocalTime existingStart = existingSlot.getStartTime();
+            LocalTime existingEnd = existingSlot.getEndTime();
+
+            // Kiểm tra xem slot mới có chồng lấn với slot hiện có hay không
+            // Slot mới không được bắt đầu hoặc kết thúc trong khoảng thời gian của slot hiện có
+            // Và slot hiện có không được bắt đầu hoặc kết thúc trong khoảng thời gian của slot mới
+            if (!(endTime.isBefore(existingStart) || startTime.isAfter(existingEnd))) {
+                throw new RuntimeException("Slot overlaps with an existing slot on " + date + " from " + existingStart + " to " + existingEnd);
+            }
+        }
+
+        // Tạo slot
         Slot slot = Slot.builder()
                 .user(psychologist)
                 .availableDate(date)
@@ -59,19 +88,50 @@ public class SlotService {
     public void updateSlot(Long psychologistId, Integer slotId, LocalDate date, LocalTime startTime, LocalTime endTime) {
         Slot slot = slotRepository.findById(slotId)
                 .orElseThrow(() -> new RuntimeException("Slot not found"));
-        Duration duration = Duration.between(startTime, endTime);
 
-        if (duration.toMinutes() > 120) {
-            throw new IllegalArgumentException("Slot duration cannot exceed 2 hours");
-        }
-
+        // Kiểm tra quyền truy cập
         if (!slot.getUser().getUserID().equals(psychologistId)) {
             throw new RuntimeException("Unauthorized");
         }
+
+        // Kiểm tra trạng thái slot
         if (slot.getAvailabilityStatus() != AvailabilityStatus.AVAILABLE) {
             throw new RuntimeException("Cannot update a booked slot");
         }
 
+        // Kiểm tra thời gian slot không nằm trong quá khứ
+        LocalDateTime slotStartDateTime = LocalDateTime.of(date, startTime);
+        LocalDateTime now = LocalDateTime.now();
+        if (slotStartDateTime.isBefore(now)) {
+            throw new RuntimeException("Cannot update a slot to a time in the past");
+        }
+
+        // Kiểm tra thời gian bắt đầu phải trước thời gian kết thúc
+        if (startTime.isAfter(endTime) || startTime.equals(endTime)) {
+            throw new RuntimeException("Start time must be before end time");
+        }
+
+        // Kiểm tra thời gian slot không vượt quá 2 giờ
+        Duration duration = Duration.between(startTime, endTime);
+        if (duration.toMinutes() > 120) {
+            throw new IllegalArgumentException("Slot duration cannot exceed 2 hours");
+        }
+
+        // Kiểm tra trùng lặp hoặc chồng lấn thời gian (ngoại trừ chính slot đang được cập nhật)
+        List<Slot> existingSlots = slotRepository.findByUserUserIDAndAvailableDate(psychologistId, date);
+        for (Slot existingSlot : existingSlots) {
+            if (existingSlot.getSlotId().equals(slotId)) {
+                continue; // Bỏ qua chính slot đang được cập nhật
+            }
+            LocalTime existingStart = existingSlot.getStartTime();
+            LocalTime existingEnd = existingSlot.getEndTime();
+
+            if (!(endTime.isBefore(existingStart) || startTime.isAfter(existingEnd))) {
+                throw new RuntimeException("Updated slot overlaps with an existing slot on " + date + " from " + existingStart + " to " + existingEnd);
+            }
+        }
+
+        // Cập nhật slot
         slot.setAvailableDate(date);
         slot.setStartTime(startTime);
         slot.setEndTime(endTime);

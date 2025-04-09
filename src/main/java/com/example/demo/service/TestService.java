@@ -76,7 +76,7 @@ public class TestService {
         return ResponseEntity.ok(testDetails);
     }
 
-    //mục API Test Scoring
+    //mục API Test Scoring fd
     public ResponseEntity<?> createTestScoring(Long testId, TestScoringDTO scoringDTO) {
         Optional<Tests> testOptional = testsRepository.findById(testId);
         if (testOptional.isEmpty()) {

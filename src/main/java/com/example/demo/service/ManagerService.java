@@ -42,12 +42,50 @@ public class ManagerService {
                 .collect(Collectors.toList());
     }
 
-    public User createPsychologist(AccountRequest request) {
+//    public User createPsychologist(AccountRequest request) {
+//
+//        if (request == null || request.getUsername() == null || request.getPassword() == null) {
+//            throw new IllegalArgumentException("Invalid request data");
+//        }
+//
+//        User user = new User();
+//        user.setUsername(request.getUsername());
+//        user.setPassword(passwordEncoder.encode(request.getPassword()));
+//        user.setFullName(request.getFullName());
+//        user.setEmail(request.getEmail());
+//        user.setRoleEnum(RoleEnum.PSYCHOLOGIST);
+//
+//        User savedUser = userRepository.save(user);
+//
+//        UserDetail detail = UserDetail.builder()
+//                .user(savedUser)
+//                .major("")
+//                .workplace("")
+//                .degree("")
+//                .fee(Double.parseDouble("150000"))
+//                .build();
+//        userDetailRepository.save(detail);
+//
+//        return savedUser;
+//    }
 
+    public User createPsychologist(AccountRequest request) {
+        // Kiểm tra dữ liệu đầu vào
         if (request == null || request.getUsername() == null || request.getPassword() == null) {
-            throw new IllegalArgumentException("Invalid request data");
+            throw new IllegalArgumentException("Dữ liệu yêu cầu không hợp lệ");
         }
 
+        // Kiểm tra xem username đã tồn tại chưa
+        if (userRepository.findByUsername(request.getUsername()).isPresent()) {
+            throw new IllegalArgumentException("Tên người dùng đã tồn tại");
+        }
+
+        // Kiểm tra xem email đã tồn tại chưa (chỉ kiểm tra các bản ghi chưa bị xóa mềm)
+        if (userRepository.findByEmailAndIsDeletedFalse(request.getEmail()).isPresent()) {
+            throw new IllegalArgumentException("Email đã tồn tại");
+        }
+
+        // Tạo người dùng mới
         User user = new User();
         user.setUsername(request.getUsername());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
@@ -55,8 +93,10 @@ public class ManagerService {
         user.setEmail(request.getEmail());
         user.setRoleEnum(RoleEnum.PSYCHOLOGIST);
 
+        // Lưu người dùng vào cơ sở dữ liệu
         User savedUser = userRepository.save(user);
 
+        // Tạo và lưu thông tin chi tiết của nhà tâm lý học
         UserDetail detail = UserDetail.builder()
                 .user(savedUser)
                 .major("")
@@ -96,6 +136,20 @@ public class ManagerService {
         return userRepository.save(user);
     }
 
+    // Thêm phương thức mới để xóa psychologist
+    public User deletePsychologist(Long id) {
+        User user = userRepository.findById(id)
+                .filter(u -> !u.isDeleted)
+                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
+
+        if (!user.getRoleEnum().equals(RoleEnum.PSYCHOLOGIST)) {
+            throw new RuntimeException("User is not a Psychologist");
+        }
+
+        user.isDeleted = true;
+        return userRepository.save(user);
+    }
+
     // Thêm phương thức mới để lấy chi tiết psychologist
     public PsychologistDetailsDTO getPsychologistDetails(Long userId) {
         User user = userRepository.findById(userId)
@@ -123,7 +177,8 @@ public class ManagerService {
                 userDetail.getMajor(),
                 userDetail.getDegree(),
                 userDetail.getWorkplace(),
-                userDetail.getFee() // Thêm fee vào DTO
+                userDetail.getFee(), // Thêm fee vào DTO
+                userDetail.getExperience()
         );
     }
 }

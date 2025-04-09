@@ -230,18 +230,21 @@ package com.example.demo.service;
 
 import com.example.demo.DTO.BookingRequest;
 import com.example.demo.DTO.BookingResponse;
-import com.example.demo.Repository.BookingRepository;
-import com.example.demo.Repository.SlotRepository;
-import com.example.demo.Repository.UserRepository;
-import com.example.demo.entity.Booking;
-import com.example.demo.entity.Slot;
-import com.example.demo.entity.User;
+import com.example.demo.DTO.PsychologistDTO;
+import com.example.demo.Repository.*;
+import com.example.demo.entity.*;
 import com.example.demo.enums.AvailabilityStatus;
 import com.example.demo.enums.BookingStatus;
+import com.example.demo.enums.RoleEnum;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -259,6 +262,13 @@ public class BookingService {
 
     @Autowired
     EmailBookingService emailBookingService;
+
+    @Autowired
+    TestScoringRepository testScoringRepository;
+
+    @Autowired
+    TestResultRepository testResultRepository;
+
 
     public BookingResponse createBooking(Long userId, BookingRequest request) {
         User customer = userRepository.findById(userId)
@@ -301,6 +311,68 @@ public class BookingService {
         return new BookingResponse(booking.getId(), "PENDING", "Booking request created successfully");
     }
 
+//    public void completeBooking(Integer bookingId, MultipartFile report) {
+//        Booking booking = getBookingOrThrow(bookingId);
+//        if (booking.getStatus() != BookingStatus.PAID) {
+//            throw new RuntimeException("Can only complete PAID bookings");
+//        }
+//
+//        Slot slot = booking.getSlot();
+//        LocalDate currentDate = LocalDate.now();
+//        LocalTime currentTime = LocalTime.now();
+//
+//        // Kiểm tra xem thời gian hiện tại có nằm trong slot không
+//        if (!currentDate.equals(slot.getAvailableDate()) ||
+//                currentTime.isBefore(slot.getStartTime()) ||
+//                currentTime.isAfter(slot.getEndTime())) {
+//            throw new RuntimeException("Booking can only be completed during the scheduled slot time");
+//        }
+//
+//        String filePath = saveFile(report);
+//        booking.setStatus(BookingStatus.COMPLETED);
+//        booking.setMedicalReportPath(filePath);
+//        bookingRepository.save(booking);
+//
+//        emailBookingService.sendEmailWithAttachment(
+//                booking.getEmail(),
+//                "Booking Completed - Report",
+//                "Dear " + booking.getFullName() + ",\n\nYour consultation report is attached.",
+//                report
+//        );
+//    }
+
+//    public void completeBooking(Integer bookingId, MultipartFile report) {
+//        Booking booking = getBookingOrThrow(bookingId);
+//        if (booking.getStatus() != BookingStatus.PAID) {
+//            throw new RuntimeException("Can only complete PAID bookings");
+//        }
+//
+//        Slot slot = booking.getSlot();
+//        LocalDate currentDate = LocalDate.now();
+//        LocalTime currentTime = LocalTime.now();
+//
+//        // Kiểm tra thời gian slot
+//        if (!currentDate.equals(slot.getAvailableDate()) ||
+//                currentTime.isBefore(slot.getStartTime()) ||
+//                currentTime.isAfter(slot.getEndTime())) {
+//            throw new RuntimeException("Booking can only be completed during the scheduled slot time");
+//        }
+//
+//        String filePath = saveFile(report);
+//        booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
+//        booking.setMedicalReportPath(filePath);
+//        booking.setConfirmationDeadline(LocalDateTime.now().plusHours(24)); // Hết hạn sau 24 giờ
+//        bookingRepository.save(booking);
+//
+//        // Gửi email yêu cầu xác nhận
+//        emailBookingService.sendEmailWithAttachment(
+//                booking.getEmail(),
+//                "Booking Awaiting Your Confirmation",
+//                "Dear " + booking.getFullName() + ",\n\nYour consultation is complete. Please confirm within 24 hours. Report attached.",
+//                report
+//        );
+//    }
+
     public void payBooking(Integer bookingId) {
         Booking booking = getBookingOrThrow(bookingId);
         if (booking.getStatus() != BookingStatus.PENDING) {
@@ -321,16 +393,67 @@ public class BookingService {
         if (booking.getStatus() != BookingStatus.PAID) {
             throw new RuntimeException("Can only complete PAID bookings");
         }
+
+        Slot slot = booking.getSlot();
+        LocalDate currentDate = LocalDate.now();
+        LocalTime currentTime = LocalTime.now();
+
+        if (!currentDate.equals(slot.getAvailableDate()) ||
+                currentTime.isBefore(slot.getStartTime()) ||
+                currentTime.isAfter(slot.getEndTime())) {
+            throw new RuntimeException("Booking can only be completed during the scheduled slot time");
+        }
+
         String filePath = saveFile(report);
-        booking.setStatus(BookingStatus.COMPLETED);
+        booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
         booking.setMedicalReportPath(filePath);
+        booking.setConfirmationDeadline(LocalDateTime.now().plusMinutes(30)); // Sửa thành 30 phút
         bookingRepository.save(booking);
 
         emailBookingService.sendEmailWithAttachment(
                 booking.getEmail(),
-                "Booking Completed - Report",
-                "Dear " + booking.getFullName() + ",\n\nYour consultation report is attached.",
+                "Booking Awaiting Your Confirmation",
+                "Dear " + booking.getFullName() + ",\n\nYour consultation is complete. Please confirm within 30 minutes. Report attached.",
                 report
+        );
+    }
+
+    @Scheduled(fixedRate = 60000) // Chạy mỗi phút
+    @Transactional
+    public void autoCompleteBookings() {
+        List<Booking> awaitingBookings = bookingRepository.findByStatus(BookingStatus.AWAITING_CONFIRMATION);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Booking booking : awaitingBookings) {
+            if (booking.getConfirmationDeadline() != null && now.isAfter(booking.getConfirmationDeadline())) {
+                booking.setStatus(BookingStatus.COMPLETED);
+                bookingRepository.save(booking);
+
+                emailBookingService.sendEmail(
+                        booking.getEmail(),
+                        "Booking Auto-Completed",
+                        "Dear " + booking.getFullName() + ",\n\nYour booking has been automatically completed due to no confirmation within 30 minutes."
+                );
+            }
+        }
+    }
+
+    public void confirmBooking(Long userId, Integer bookingId) {
+        Booking booking = getBookingOrThrow(bookingId);
+        if (!booking.getUser().getUserID().equals(userId)) {
+            throw new RuntimeException("Unauthorized to confirm this booking");
+        }
+        if (booking.getStatus() != BookingStatus.AWAITING_CONFIRMATION) {
+            throw new RuntimeException("Booking is not awaiting confirmation");
+        }
+
+        booking.setStatus(BookingStatus.COMPLETED);
+        bookingRepository.save(booking);
+
+        emailBookingService.sendEmail(
+                booking.getEmail(),
+                "Booking Confirmed",
+                "Dear " + booking.getFullName() + ",\n\nYour booking has been successfully confirmed."
         );
     }
 
@@ -343,7 +466,7 @@ public class BookingService {
         if (!booking.getUser().getUserID().equals(userId)) {
             throw new RuntimeException("Unauthorized to cancel this booking");
         }
-        if (booking.getStatus() == BookingStatus.PAID || booking.getStatus() == BookingStatus.COMPLETED) {
+        if (booking.getStatus() != BookingStatus.PENDING) { // Chỉ cho phép hủy khi PENDING
             throw new RuntimeException("Cannot cancel a paid or completed booking");
         }
         Slot slot = booking.getSlot();
@@ -364,6 +487,65 @@ public class BookingService {
                 "Booking Cancelled",
                 "The booking for your slot on " + slot.getAvailableDate() + " has been cancelled."
         );
+    }
+
+    @Scheduled(fixedRate = 60000) // Chạy mỗi phút
+    @Transactional
+    public void autoCancelUnpaidBookings() {
+        List<Booking> pendingBookings = bookingRepository.findByStatus(BookingStatus.PENDING);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Booking booking : pendingBookings) {
+            LocalDateTime createdAt = booking.getCreatedAt(); // Giả sử Booking có field createdAt
+            if (createdAt != null && now.isAfter(createdAt.plusMinutes(10))) { // Quá 10 phút
+                booking.setStatus(BookingStatus.CANCELLED);
+                Slot slot = booking.getSlot();
+                if (slot != null) {
+                    slot.setAvailabilityStatus(AvailabilityStatus.AVAILABLE);
+                    slotRepository.save(slot);
+                }
+                bookingRepository.save(booking);
+
+                // Gửi email thông báo
+                emailBookingService.sendEmail(
+                        booking.getEmail(),
+                        "Booking Cancelled Due to Non-Payment",
+                        "Dear " + booking.getFullName() + ",\n\nYour booking on " + slot.getAvailableDate() + " at " + slot.getStartTime() + " has been cancelled due to non-payment within 10 minutes."
+                );
+                emailBookingService.sendEmail(
+                        slot.getUser().getEmail(),
+                        "Booking Cancelled Due to Non-Payment",
+                        "The booking for your slot on " + slot.getAvailableDate() + " at " + slot.getStartTime() + " has been cancelled due to non-payment."
+                );
+            }
+        }
+    }
+
+    @Scheduled(fixedRate = 60000) // Chạy mỗi phút
+    @Transactional
+    public void autoCompleteOverdueBookings() {
+        List<Booking> paidBookings = bookingRepository.findByStatus(BookingStatus.PAID);
+        LocalDateTime now = LocalDateTime.now();
+
+        for (Booking booking : paidBookings) {
+            Slot slot = booking.getSlot();
+            LocalDate slotDate = slot.getAvailableDate();
+            LocalTime slotEndTime = slot.getEndTime();
+            LocalDateTime slotEndDateTime = LocalDateTime.of(slotDate, slotEndTime);
+
+            if (now.isAfter(slotEndDateTime)) { // Slot đã kết thúc
+                booking.setStatus(BookingStatus.AWAITING_CONFIRMATION);
+                booking.setConfirmationDeadline(LocalDateTime.now().plusMinutes(30)); // 30 phút để student xác nhận
+                bookingRepository.save(booking);
+
+                // Gửi email thông báo cho student
+                emailBookingService.sendEmail(
+                        booking.getEmail(),
+                        "Booking Awaiting Your Confirmation",
+                        "Dear " + booking.getFullName() + ",\n\nYour consultation on " + slot.getAvailableDate() + " at " + slot.getStartTime() + " has ended. Please confirm within 30 minutes."
+                );
+            }
+        }
     }
 
     public List<BookingResponse> getUserBookings(Long userId) {
@@ -456,5 +638,71 @@ public class BookingService {
     private Booking getBookingOrThrow(Integer bookingId) {
         return bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new RuntimeException("Booking not found"));
+    }
+
+    public List<PsychologistDTO> recommendPsychologists(Long userId) {
+        TestResult latestTestResult = testResultRepository.findTopByUser_UserIDOrderByCreateAtDesc(userId)
+                .orElseThrow(() -> new RuntimeException("No test result found for user"));
+
+        String testLevel = determineTestLevel(latestTestResult.getTotalScore(), latestTestResult.getTest().getId());
+        String normalizedLevel = testLevel.toLowerCase();
+
+        List<User> psychologists = userRepository.findByRoleEnumAndIsDeletedFalse(RoleEnum.PSYCHOLOGIST);
+        return psychologists.stream()
+                .filter(p -> p.getUserDetail() != null && isSuitablePsychologist(p.getUserDetail(), normalizedLevel))
+                .map(p -> {
+                    PsychologistDTO dto = new PsychologistDTO();
+                    dto.setUserId(p.getUserID());
+                    dto.setFullName(p.getFullName());
+                    dto.setEmail(p.getEmail());
+                    dto.setDob(p.getDob());
+                    dto.setPhone(p.getPhone());
+                    dto.setGender(p.getGender());
+                    dto.setAvatar(p.getAvatar());
+                    dto.setMajor(p.getUserDetail().getMajor());
+                    dto.setWorkplace(p.getUserDetail().getWorkplace());
+                    dto.setDegree(p.getUserDetail().getDegree());
+                    dto.setFee(p.getUserDetail().getFee());
+                    dto.setExperience(p.getUserDetail().getExperience());
+                    return dto;
+                })
+                .collect(Collectors.toMap(
+                        PsychologistDTO::getUserId,
+                        dto -> dto,
+                        (dto1, dto2) -> dto1
+                ))
+                .values()
+                .stream()
+                .collect(Collectors.toList());
+    }
+
+    private String determineTestLevel(int score, Long testId) {
+        List<TestScoring> scorings = testScoringRepository.findByTest_Id(testId);
+        for (TestScoring scoring : scorings) {
+            if (score >= scoring.getMinScore() && (scoring.getMaxScore() == null || score <= scoring.getMaxScore())) {
+                return scoring.getLevel();
+            }
+        }
+        return "Unknown";
+    }
+
+    private boolean isSuitablePsychologist(UserDetail userDetail, String testLevel) {
+        Integer experience = userDetail.getExperience();
+        if (experience == null) {
+            return false;
+        }
+
+        if (testLevel.contains("non-minimal")) {
+            return experience >= 1 && experience <= 2;
+        } else if (testLevel.contains("minimal")) {
+            return experience >= 3 && experience <= 4;
+        } else if (testLevel.contains("mild")) {
+            return experience >= 4 && experience <= 5;
+        } else if (testLevel.contains("moderate")) {
+            return experience >= 6 && experience <= 7;
+        } else if (testLevel.contains("severe")) {
+            return experience >= 8 && experience <= 9;
+        }
+        return false;
     }
 }

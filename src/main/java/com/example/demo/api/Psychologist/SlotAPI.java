@@ -4,6 +4,7 @@ import com.example.demo.entity.Slot;
 import com.example.demo.service.SlotService;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
@@ -24,13 +25,21 @@ public class SlotAPI {
     }
 
     @PostMapping("/create")
-    public ResponseEntity<Slot> createSlot(@RequestParam Long psychologistId,
-                                           @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date,
-                                           @RequestParam String startTime,
-                                           @RequestParam String endTime) {
-        LocalTime start = LocalTime.parse(startTime);
-        LocalTime end = LocalTime.parse(endTime);
-        return ResponseEntity.ok(slotService.createSlot(psychologistId, date, start, end));
+    public ResponseEntity<?> createSlot(
+            @RequestParam Long psychologistId,
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date,
+            @RequestParam String startTime,
+            @RequestParam String endTime) {
+        try {
+            LocalTime start = LocalTime.parse(startTime);
+            LocalTime end = LocalTime.parse(endTime);
+            Slot slot = slotService.createSlot(psychologistId, date, start, end);
+            return ResponseEntity.ok(slot);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while creating the slot");
+        }
     }
 
     @GetMapping
@@ -39,24 +48,26 @@ public class SlotAPI {
     }
 
     @PutMapping("/update")
-    public ResponseEntity<String> updateSlot(@RequestParam Long psychologistId,
-                                             @RequestParam Integer slotId,
-                                             @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date,
-                                             @RequestParam String startTime,
-                                             @RequestParam String endTime) {
-        LocalTime start = LocalTime.parse(startTime);
-        LocalTime end = LocalTime.parse(endTime);
-        slotService.updateSlot(psychologistId, slotId, date, start, end);
-        return ResponseEntity.ok("Slot updated successfully");
+    public ResponseEntity<?> updateSlot(
+            @RequestParam Long psychologistId,
+            @RequestParam Integer slotId,
+            @RequestParam @DateTimeFormat(pattern = "dd-MM-yyyy") LocalDate date,
+            @RequestParam String startTime,
+            @RequestParam String endTime) {
+        try {
+            LocalTime start = LocalTime.parse(startTime);
+            LocalTime end = LocalTime.parse(endTime);
+            slotService.updateSlot(psychologistId, slotId, date, start, end);
+            return ResponseEntity.ok("Slot updated successfully");
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("An error occurred while updating the slot");
+        }
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<String> deleteSlot(@RequestParam Long psychologistId, @RequestParam Integer slotId) {
         return slotService.deleteSlot(psychologistId, slotId);
     }
-
-//    @GetMapping("/available")
-//    public ResponseEntity<List<Slot>> getAvailableSlots(@RequestParam Long psychologistId) {
-//        return ResponseEntity.ok(slotService.getAvailableSlots(psychologistId));
-//    }
 }

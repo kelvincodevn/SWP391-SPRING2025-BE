@@ -8,7 +8,6 @@ import lombok.*;
 @Entity
 @Table(name = "user_details")
 @Builder
-
 public class UserDetail {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,7 +21,8 @@ public class UserDetail {
     private String major;
     private String workplace;
     private String degree;
-    private Double fee; // Thêm field fee để lưu phí dịch vụ
+    private Double fee;
+    private Integer experience; // Thêm field experience (số năm kinh nghiệm)
 
     @PrePersist
     @PreUpdate
@@ -35,13 +35,14 @@ public class UserDetail {
     public UserDetail() {
     }
 
-    public UserDetail(Integer userDetailId, User user, String major, String workplace, String degree, Double fee) {
+    public UserDetail(Integer userDetailId, User user, String major, String workplace, String degree, Double fee, Integer experience) {
         this.userDetailId = userDetailId;
         this.user = user;
         this.major = major;
         this.workplace = workplace;
         this.degree = degree;
         this.fee = fee;
+        this.experience = experience;
     }
 
     public Integer getUserDetailId() {
@@ -92,5 +93,11 @@ public class UserDetail {
         this.fee = fee;
     }
 
+    public Integer getExperience() {
+        return experience;
+    }
 
+    public void setExperience(Integer experience) {
+        this.experience = experience;
+    }
 }

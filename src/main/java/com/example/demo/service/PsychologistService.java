@@ -13,9 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 @Service
 public class PsychologistService {
@@ -23,16 +21,12 @@ public class PsychologistService {
     @Autowired
     private UserRepository userRepository;
 
-//    @Autowired
-//    private PsychologistSlotRepository psychologistSlotRepository;
-
     @Autowired
     private BookingRepository bookingRepository;
 
     @Autowired
     TestResultRepository testResultRepository;
 
-    // Lấy thông tin psychologist hiện tại từ Security Context
     public User getCurrentPsychologist() {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         return userRepository.findByUsername(username)
@@ -44,86 +38,6 @@ public class PsychologistService {
         return userRepository.findByRoleEnumAndIsDeletedFalse(RoleEnum.PSYCHOLOGIST);
     }
 
-//    public Map<String, Object> getPsychologistStats(Long psychologistId) {
-//        User psychologist = userRepository.findById(psychologistId)
-//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST && !u.isDeleted())
-//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-//
-//        long totalSlots = psychologistSlotRepository.countByPsychologistId(psychologistId);
-//        long totalBookings = bookingRepository.countByPsychologistId(psychologistId);
-//        long completedBookings = bookingRepository.countByPsychologistIdAndStatus(psychologistId, BookingStatus.COMPLETED);
-//
-//        Map<String, Object> stats = new HashMap<>();
-//        stats.put("totalSlots", totalSlots);
-//        stats.put("totalBookings", totalBookings);
-//        stats.put("completedBookings", completedBookings);
-//
-//        return stats;
-//    }
-//
-//    public List<Map<String, Object>> getPsychologistClients(Long psychologistId) {
-//        User psychologist = userRepository.findById(psychologistId)
-//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST && !u.isDeleted())
-//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-//
-//        // Lấy danh sách booking của psychologist
-//        List<Booking> bookings = bookingRepository.findByPsychologistIdAndStatusNot(psychologistId, BookingStatus.CANCELLED);
-//
-//        // Chuyển đổi thông tin client từ booking
-//        List<Map<String, Object>> clients = new ArrayList<>();
-//        for (Booking booking : bookings) {
-//            Map<String, Object> client = new HashMap<>();
-//            client.put("id", booking.getUser().getUserID());
-//            client.put("fullName", booking.getUser().getFullName());
-//            client.put("email", booking.getUser().getEmail());
-//            client.put("bookingId", booking.getId());
-//            client.put("bookingDate", booking.getSlot().getAvailableDate());
-//            clients.add(client);
-//        }
-//
-//        return clients;
-//    }
-
-//    public Map<String, Object> getPsychologistStats(Long psychologistId) {
-//        User psychologist = userRepository.findById(psychologistId)
-//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST)
-//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-//
-//        long totalSlots = psychologistSlotRepository.countByPsychologistUserID(psychologistId);
-//        long totalBookings = bookingRepository.countByPsychologistId(psychologistId);
-//        long completedBookings = bookingRepository.countByPsychologistIdAndStatus(psychologistId, BookingStatus.COMPLETED);
-//
-//        Map<String, Object> stats = new HashMap<>();
-//        stats.put("totalSlots", totalSlots);
-//        stats.put("totalBookings", totalBookings);
-//        stats.put("completedBookings", completedBookings);
-//
-//        return stats;
-//    }
-
-//    public List<Map<String, Object>> getPsychologistClients(Long psychologistId) {
-//        User psychologist = userRepository.findById(psychologistId)
-//                .filter(u -> u.getRoleEnum() == RoleEnum.PSYCHOLOGIST)
-//                .orElseThrow(() -> new RuntimeException("Psychologist not found"));
-//
-//        // Lấy danh sách booking của psychologist
-//        List<Booking> bookings = bookingRepository.findByPsychologistIdAndStatusNot(psychologistId, BookingStatus.CANCELLED);
-//
-//        // Chuyển đổi thông tin client từ booking
-//        List<Map<String, Object>> clients = new ArrayList<>();
-//        for (Booking booking : bookings) {
-//            Map<String, Object> client = new HashMap<>();
-//            client.put("id", booking.getUser().getUserID());
-//            client.put("fullName", booking.getUser().getFullName());
-//            client.put("email", booking.getUser().getEmail());
-//            client.put("bookingId", booking.getId());
-//            client.put("bookingDate", booking.getSlot().getAvailableDate());
-//            clients.add(client);
-//        }
-//
-//        return clients;
-//    }
-
     public PsychologistDetailsDTO getPsychologistProfile() {
         User psychologist = getCurrentPsychologist();
         UserDetail userDetail = psychologist.getUserDetail();
@@ -131,7 +45,6 @@ public class PsychologistService {
             throw new RuntimeException("UserDetail not found for this psychologist");
         }
 
-        // Map User and UserDetail to PsychologistDetailsDTO
         PsychologistDetailsDTO profile = new PsychologistDetailsDTO();
         profile.setUsername(psychologist.getUsername());
         profile.setFullName(psychologist.getFullName());
@@ -146,6 +59,7 @@ public class PsychologistService {
         profile.setDegree(userDetail.getDegree());
         profile.setWorkplace(userDetail.getWorkplace());
         profile.setFee(userDetail.getFee());
+        profile.setExperience(userDetail.getExperience()); // Thêm experience
 
         return profile;
     }
@@ -157,7 +71,6 @@ public class PsychologistService {
             throw new RuntimeException("UserDetail not found for this psychologist");
         }
 
-        // Update fields in User entity
         if (profileData.getUsername() != null) {
             psychologist.setUsername(profileData.getUsername());
         }
@@ -180,7 +93,6 @@ public class PsychologistService {
             psychologist.setAvatar(profileData.getAvatar());
         }
 
-        // Update fields in UserDetail entity
         if (profileData.getMajor() != null) {
             userDetail.setMajor(profileData.getMajor());
         }
@@ -193,11 +105,12 @@ public class PsychologistService {
         if (profileData.getFee() != null) {
             userDetail.setFee(profileData.getFee());
         }
+        if (profileData.getExperience() != null) { // Thêm cập nhật experience
+            userDetail.setExperience(profileData.getExperience());
+        }
 
-        // Save the updated User (which will cascade to UserDetail due to CascadeType.ALL)
         userRepository.save(psychologist);
 
-        // Map the updated User and UserDetail to PsychologistDetailsDTO
         PsychologistDetailsDTO updatedProfile = new PsychologistDetailsDTO();
         updatedProfile.setUsername(psychologist.getUsername());
         updatedProfile.setFullName(psychologist.getFullName());
@@ -212,20 +125,15 @@ public class PsychologistService {
         updatedProfile.setDegree(userDetail.getDegree());
         updatedProfile.setWorkplace(userDetail.getWorkplace());
         updatedProfile.setFee(userDetail.getFee());
+        updatedProfile.setExperience(userDetail.getExperience()); // Thêm experience
 
         return updatedProfile;
     }
 
-//    public List<Booking> findBookingsByPsychologistUserId(Long userId) {
-//        return bookingRepository.findByPsychologistSlot_Psychologist_UserID(userId);
-//    }
-
-    // Lấy danh sách bài test mà khách hàng đã làm
     public List<TestResult> getTestResultsByUserId(Long userId) {
         return testResultRepository.findByUser_UserID(userId);
     }
 
-    // Lấy chi tiết kết quả bài test
     public TestResult getTestResultById(Long resultId) {
         return testResultRepository.findById(resultId)
                 .orElseThrow(() -> new RuntimeException("Test result not found"));
